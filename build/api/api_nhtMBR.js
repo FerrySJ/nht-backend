@@ -784,7 +784,7 @@ router.get("/MBRC_Ball/:start_date/:end_date", async (req, res) => {
     // console.log(dataset);
 
     let BallUsage = [resultUsage_Ball];
-    let resultDate_Ball = [];
+    let resultDate_Ball = [];mms_mbrmd_total
     arrayData_Ball.forEach(function (a) {
       if (!this[a.mfg_date]) {
         this[a.mfg_date] = { name: a.mfg_date };
@@ -7397,6 +7397,7 @@ router.post("/MBRC_mornitoring_all/:start_date", async (req, res) => {
       , MAX(CASE WHEN RN = 1 THEN format(registered_at,'HH:mm:ss') ELSE NULL END) time
       , MAX(CASE WHEN RN = 1 THEN [dairy_ok] ELSE NULL END) production_ok
       , MAX(CASE WHEN RN = 1 THEN [dairy_ng] ELSE NULL END) production_ng
+      , MAX(CASE WHEN RN = 1 THEN [dairy_total] ELSE NULL END) production_total
       , MAX(CASE WHEN RN = 1 THEN [registered_at] ELSE NULL END) Last_Date
       , MAX(CASE WHEN RN = 1 THEN [dairy_ok] ELSE NULL END) - COALESCE(MAX(CASE WHEN RN = 2 THEN [dairy_ok] ELSE NULL END), 0) PROD_DIFF
         ,MAX(CASE WHEN RN = 1 THEN [adjust_time]+[alarm_time]+[stop_time]+[error_time]+[full_part_time]+[plan_stop_time]+[set_up_time]+[wait_part_time]  ELSE NULL END) DT
@@ -7419,14 +7420,41 @@ router.post("/MBRC_mornitoring_all/:start_date", async (req, res) => {
       ) t1
       GROUP BY [mc_no],[model],[mfg_date]
       )
-      select [mfg_date],CONVERT(char(5), time, 108) as at_time,[mc_no],[model],production_ok,production_ng,Last_Date,PROD_DIFF,DT,UTL_target,cast((PROD_DIFF/NULLIF(UTL_target,0))*100  as decimal(20,2)) as UTL,ct, yield
+      select [mfg_date],CONVERT(char(5), time, 108) as at_time,[mc_no],[model],production_ok,production_ng,production_total,Last_Date,PROD_DIFF,DT,UTL_target,cast((PROD_DIFF/NULLIF(UTL_target,0))*100  as decimal(20,2)) as UTL,ct, yield
       ,IIF(ct> 3.5,'red','') as bg_ct, IIF(cast((PROD_DIFF/NULLIF(UTL_target,0))*100  as decimal(20,2)) < 80,'red',IIF(cast((PROD_DIFF/NULLIF(UTL_target,0))*100  as decimal(20,2)) > 100,'green','')) as bg_utl, IIF(yield < 80,'red','') as bg_yield
       from result
       order by mc_no asc
       `);
       console.log("======= DATA TODAY Table Mornitoring =======");
+      // SUM Prod
+      const data1 = result[0];
+      
+      const sumProductionTotalsByModel = (data) => {
+        return data.reduce((acc, item) => {
+          // แยกตัวอักษรและตัวเลขใน mc_no
+          const model = item.mc_no.match(/^[A-Z]+/)[0];
+          const productionTotal = item.production_total !== null ? item.production_total : 0;
+          
+          if (!acc[model]) {
+            acc[model] = 0;
+          }
+          acc[model] += productionTotal;
+          return acc;
+        }, {});
+      };
+      
+      const result_prod_total = sumProductionTotalsByModel(data1);
+      // console.log(result_prod_total);
+
+const totalSum = Object.values(result_prod_total).reduce((acc, curr) => acc + curr, 0);
+
+// console.log("sum",totalSum); // Output: 599929
+
+      
       res.json({
         result: result,
+        result_prod_total: result_prod_total,
+        totalSum:totalSum,
         api_result: constance.result_ok,
       });
     } else {
@@ -7462,13 +7490,13 @@ router.post("/MBRC_mornitoring_all/:start_date", async (req, res) => {
                     FROM [machine_data].[dbo].[DATA_PRODUCTION_ASSY]
                     where format(iif(DATEPART(HOUR, [registered_at]) < 8, dateadd(day, -1, [registered_at]), [registered_at]), 'yyyy-MM-dd') = '${req.body.yesterday}' and DATEPART(HOUR,registered_at) = '7'
                     )
-                    ,tb3 as (select [mfg_date],tb2.time,tb1.mc_no,tb1.model,[dairy_ok],[dairy_ng], SUM(tb1.UTL_target) as sum_utl,DT,yield
+                    ,tb3 as (select [mfg_date],tb2.time,tb1.mc_no,tb1.model,[dairy_ok],[dairy_ng],dairy_total, SUM(tb1.UTL_target) as sum_utl,DT,yield
                     ,cast((dairy_ok/NULLIF(SUM(tb1.UTL_target), 0))*100  as decimal(20,2)) as UTL, [cycle_time]/100 as ct
                     from tb1
                     left join tb2
                     on tb1.mc_no = tb2.mc_no
-                    group by tb1.mc_no,tb1.model,DT,[mfg_date],[dairy_ok],[dairy_ng],yield,cycle_time,tb2.time)
-                    select mfg_date,mc_no,model,dairy_ok as production_ok,[dairy_ng] as production_ng,DT,yield,UTL,ct
+                    group by tb1.mc_no,tb1.model,DT,[mfg_date],[dairy_ok],[dairy_ng],dairy_total,yield,cycle_time,tb2.time)
+                    select mfg_date,mc_no,model,dairy_ok as production_ok,[dairy_ng] as production_ng,[dairy_total] as production_total,DT,yield,UTL,ct
                     ,IIF(UTL < 80 ,'red',IIF(UTL < 80 ,'green','')) as bg_utl
                     ,IIF(yield < 80 ,'red','') as bg_yield
                     ,IIF(ct> 3.5,'red','') as bg_ct
@@ -7478,8 +7506,29 @@ router.post("/MBRC_mornitoring_all/:start_date", async (req, res) => {
         `
       );
       console.log("======= NOK Table Mornitoring =======");
-      res.json({
+      // SUM Prod
+      const data1 = result[0];
+      
+      const sumProductionTotalsByModel = (data) => {
+        return data.reduce((acc, item) => {
+          // แยกตัวอักษรและตัวเลขใน mc_no
+          const model = item.mc_no.match(/^[A-Z]+/)[0];
+          const productionTotal = item.production_total !== null ? item.production_total : 0;
+          
+          if (!acc[model]) {
+            acc[model] = 0;
+          }
+          acc[model] += productionTotal;
+          return acc;
+        }, {});
+      };
+      
+      const result_prod_total = sumProductionTotalsByModel(data1);
+const totalSum = Object.values(result_prod_total).reduce((acc, curr) => acc + curr, 0);
+res.json({
         result: result,
+        result_prod_total: result_prod_total,
+        totalSum: totalSum,
         api_result: constance.result_ok,
       });
     }
@@ -9407,7 +9456,7 @@ router.post(
         }
 
         // console.log(Ball_Daily[0]);
-        console.log(resultdata_Ball);
+        // console.log(resultdata_Ball);
 
         res.json({
           resultBall: result_Ball_Daily,
