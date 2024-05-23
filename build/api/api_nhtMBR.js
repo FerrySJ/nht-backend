@@ -7388,18 +7388,20 @@ router.get("/MMS_downtime_MBRC_MD/:mc_no/:start_date", async (req, res) => {
 router.post("/MBRC_mornitoring_all/:start_date", async (req, res) => {
   try {
     let { start_date } = req.params;
-  console.log(req.body, start_date,moment().format("HH"));
-  const hour = parseInt(moment().format("HH"), 10);
-if (hour >= 0 && hour <= 7) {
-  console.log("8888 >> ", hour);
-} else {
-  console.log("lllll");
-}
-  if (req.body.yesterday != start_date) {
+  // console.log(req.body, start_date,moment().format("yyyy-MM-DD"));
+//   const hour = parseInt(moment().format("HH"), 10);
+// if (hour >= 0 && hour <= 7) {
+//   console.log("8888 >> ", hour);
+// } else {
+//   console.log("lllll");
+// }
+  if (start_date === moment().format("yyyy-MM-DD")) {
+    // if (req.body.yesterday != start_date) {
       console.log("ok");
+      // ใช้ [dairy_total] หา UTL
       let result = await MBR_table.sequelize.query(`
-      -- today != yesterday
-      with result as (SELECT 
+      -- today === moment
+      with result as (SELECT
         [mfg_date] ,[mc_no],[model]
       , MAX(CASE WHEN RN = 1 THEN format(registered_at,'HH:mm:ss') ELSE NULL END) time
       , MAX(CASE WHEN RN = 1 THEN [dairy_ok] ELSE NULL END) production_ok
@@ -7407,20 +7409,21 @@ if (hour >= 0 && hour <= 7) {
       , MAX(CASE WHEN RN = 1 THEN [dairy_total] ELSE NULL END) production_total
       , MAX(CASE WHEN RN = 1 THEN [registered_at] ELSE NULL END) Last_Date
       , MAX(CASE WHEN RN = 1 THEN [wait_part_time] ELSE NULL END) wait_time
-      , MAX(CASE WHEN RN = 1 THEN [dairy_ok] ELSE NULL END) - COALESCE(MAX(CASE WHEN RN = 2 THEN [dairy_ok] ELSE NULL END), 0) PROD_DIFF
+      , MAX(CASE WHEN RN = 1 THEN [dairy_total] ELSE NULL END) - COALESCE(MAX(CASE WHEN RN = 2 THEN [dairy_total] ELSE NULL END), 0) PROD_DIFF
+      --, MAX(CASE WHEN RN = 1 THEN [dairy_ok] ELSE NULL END) - COALESCE(MAX(CASE WHEN RN = 2 THEN [dairy_ok] ELSE NULL END), 0) PROD_DIFF
         ,MAX(CASE WHEN RN = 1 THEN [adjust_time]+[alarm_time]+[stop_time]+[error_time]+[full_part_time]+[plan_stop_time]+[set_up_time]+[wait_part_time]  ELSE NULL END) DT
         , MAX(CASE WHEN RN = 1 THEN cast((3600/NULLIF([cycle_time], 0))*100  as decimal(20,0)) ELSE NULL END) UTL_target
       , MAX(CASE WHEN RN = 1 THEN [cycle_time]/100 ELSE NULL END)  ct
       , MAX(CASE WHEN RN = 1 THEN (Case when [dairy_total]=0 then 0
-                        Else cast(([dairy_ok]/[dairy_total])*100  as decimal(20,2)) 
+                        Else cast(([dairy_ok]/[dairy_total])*100  as decimal(20,2))
                         End ) ELSE NULL END) yield
       FROM
       (
           SELECT format(iif(DATEPART(HOUR, [registered_at]) < 8, dateadd(day, -1, [registered_at]), [registered_at]), 'yyyy-MM-dd') as [mfg_date]
-		  ,[mc_no],(CHAR(CONVERT(INT, [Model_1])) + CHAR(CONVERT(INT, [Model_2])) + CHAR(CONVERT(INT, [Model_3])) +
-		CHAR(CONVERT(INT, [Model_4])) + CHAR(CONVERT(INT, [Model_5])) + CHAR(CONVERT(INT, [Model_6])) +
-		CHAR(CONVERT(INT, [Model_7])) + CHAR(CONVERT(INT, [Model_8])) + CHAR(CONVERT(INT, [Model_9])) +
-		CHAR(CONVERT(INT, [Model_10])) + CHAR(CONVERT(INT, [Model_11])) + CHAR(CONVERT(INT, [Model_12]))) AS model,[Daily_OK] as [dairy_ok],[Daily_NG] as [dairy_ng],[Daily_Total] as [dairy_total],[registered_at],[Cycle_Time] as [cycle_time]
+                  ,[mc_no],(CHAR(CONVERT(INT, [Model_1])) + CHAR(CONVERT(INT, [Model_2])) + CHAR(CONVERT(INT, [Model_3])) +
+                CHAR(CONVERT(INT, [Model_4])) + CHAR(CONVERT(INT, [Model_5])) + CHAR(CONVERT(INT, [Model_6])) +     
+                CHAR(CONVERT(INT, [Model_7])) + CHAR(CONVERT(INT, [Model_8])) + CHAR(CONVERT(INT, [Model_9])) +     
+                CHAR(CONVERT(INT, [Model_10])) + CHAR(CONVERT(INT, [Model_11])) + CHAR(CONVERT(INT, [Model_12]))) AS model,[Daily_OK] as [dairy_ok],[Daily_NG] as [dairy_ng],[Daily_Total] as [dairy_total],[registered_at],[Cycle_Time] as [cycle_time]
         ,[error_time],[alarm_time],[stop_time],[wait_part_time],[full_part_time],[adjust_time],[set_up_time],[plan_stop_time]
           ,ROW_NUMBER() OVER (PARTITION BY [mc_no] ORDER BY [registered_at] DESC) RN
           FROM [machine_data].[dbo].[DATA_PRODUCTION_ASSY]
@@ -7467,49 +7470,53 @@ const totalSum = Object.values(result_prod_total).reduce((acc, curr) => acc + cu
       });
     } else {
       let result = await MBR_table.sequelize.query(
-        `
-        with tb1 as(
-                  select [mc_no],(CHAR(CONVERT(INT, [Model_1])) + CHAR(CONVERT(INT, [Model_2])) + CHAR(CONVERT(INT, [Model_3])) +
-               CHAR(CONVERT(INT, [Model_4])) + CHAR(CONVERT(INT, [Model_5])) + CHAR(CONVERT(INT, [Model_6])) +
-               CHAR(CONVERT(INT, [Model_7])) + CHAR(CONVERT(INT, [Model_8])) + CHAR(CONVERT(INT, [Model_9])) +
-               CHAR(CONVERT(INT, [Model_10])) + CHAR(CONVERT(INT, [Model_11])) + CHAR(CONVERT(INT, [Model_12]))) AS model 
-               ,cast((3600/NULLIF([cycle_time], 0))*100  as decimal(20,0)) as UTL_target
-                  FROM [machine_data].[dbo].[DATA_PRODUCTION_ASSY]
-                  where format(iif(DATEPART(HOUR, [registered_at]) < 8, dateadd(day, -1, [registered_at]), [registered_at]), 'yyyy-MM-dd') = '${req.body.yesterday}'
-                  )
-                  ,tb2 as(SELECT [registered_at]
-                  , convert(varchar, [registered_at], 8) as time
-                  ,format(iif(DATEPART(HOUR, [registered_at]) < 8, dateadd(day, -1, [registered_at]), [registered_at]), 'yyyy-MM-dd') as [mfg_date]
-              ,[mc_no]
-              ,(CHAR(CONVERT(INT, [Model_1])) + CHAR(CONVERT(INT, [Model_2])) + CHAR(CONVERT(INT, [Model_3])) +
-               CHAR(CONVERT(INT, [Model_4])) + CHAR(CONVERT(INT, [Model_5])) + CHAR(CONVERT(INT, [Model_6])) +
-               CHAR(CONVERT(INT, [Model_7])) + CHAR(CONVERT(INT, [Model_8])) + CHAR(CONVERT(INT, [Model_9])) +
-               CHAR(CONVERT(INT, [Model_10])) + CHAR(CONVERT(INT, [Model_11])) + CHAR(CONVERT(INT, [Model_12]))) AS model 
-                    ,[Daily_Total] as [dairy_total] ,[Daily_OK] as [dairy_ok] ,[Daily_NG] as [dairy_ng]
-                  ,cast((3600/NULLIF([cycle_time], 0))*100  as decimal(20,0)) as UTL_target
-                  ,[cycle_time] ,[Target_Utilize] as [target_utl]
-                  ,cast(([Daily_OK]/NULLIF(cast((3600/NULLIF([cycle_time], 0))*100  as decimal(20,0)), 0))*100 as decimal(20,2)) as utl
-                    ,[run_time],[wait_part_time] AS wait_time
-                    ,[adjust_time]+[alarm_time]+[stop_time]+[error_time]+[full_part_time]+[plan_stop_time]+[set_up_time]+[wait_part_time] as DT
-                    ,Case when [Daily_Total]=0 then 0
-                    Else cast(([Daily_OK]/[Daily_Total])*100  as decimal(20,2)) 
-                    End as yield
-                    FROM [machine_data].[dbo].[DATA_PRODUCTION_ASSY]
-                    where format(iif(DATEPART(HOUR, [registered_at]) < 8, dateadd(day, -1, [registered_at]), [registered_at]), 'yyyy-MM-dd') = '${req.body.yesterday}' and DATEPART(HOUR,registered_at) = '7'
-                    )
-                    ,tb3 as (select [mfg_date],tb2.time,tb1.mc_no,tb1.model,[dairy_ok],[dairy_ng],dairy_total, SUM(tb1.UTL_target) as sum_utl,DT,wait_time,yield
-                    ,cast((dairy_ok/NULLIF(SUM(tb1.UTL_target), 0))*100  as decimal(20,2)) as UTL, [cycle_time]/100 as ct
-                    from tb1
-                    left join tb2
-                    on tb1.mc_no = tb2.mc_no
-                    group by tb1.mc_no,tb1.model,DT,wait_time,[mfg_date],[dairy_ok],[dairy_ng],dairy_total,yield,cycle_time,tb2.time)
-                    select mfg_date,mc_no,model,dairy_ok as production_ok,[dairy_ng] as production_ng,[dairy_total] as production_total,DT,wait_time,yield,UTL,ct
-                    ,IIF(UTL < 80 ,'red',IIF(UTL < 80 ,'green','')) as bg_utl
-                    ,IIF(yield < 80 ,'red','') as bg_yield
-                    ,IIF(ct> 3.5,'red','') as bg_ct
-                    ,CONVERT(char(5), time, 108) as at_time
-              from tb3
-                    order by mc_no asc
+        `with tb1 as(
+          select [mc_no],(CHAR(CONVERT(INT, [Model_1])) + CHAR(CONVERT(INT, [Model_2])) + CHAR(CONVERT(INT, 
+[Model_3])) +
+       CHAR(CONVERT(INT, [Model_4])) + CHAR(CONVERT(INT, [Model_5])) + CHAR(CONVERT(INT, [Model_6])) +      
+       CHAR(CONVERT(INT, [Model_7])) + CHAR(CONVERT(INT, [Model_8])) + CHAR(CONVERT(INT, [Model_9])) +      
+       CHAR(CONVERT(INT, [Model_10])) + CHAR(CONVERT(INT, [Model_11])) + CHAR(CONVERT(INT, [Model_12]))) AS 
+model
+       ,cast(((3600*24)/NULLIF([cycle_time], 0))*100  as decimal(20,0)) as UTL_target
+          FROM [machine_data].[dbo].[DATA_PRODUCTION_ASSY]
+          where format(iif(DATEPART(HOUR, [registered_at]) < 8, dateadd(day, -1, [registered_at]), [registered_at]), 'yyyy-MM-dd') = '${start_date}' and DATEPART(HOUR,registered_at) = '7'
+          )
+          ,tb2 as(SELECT [registered_at]
+          , convert(varchar, [registered_at], 8) as time
+          ,format(iif(DATEPART(HOUR, [registered_at]) < 8, dateadd(day, -1, [registered_at]), [registered_at]), 'yyyy-MM-dd') as [mfg_date]
+      ,[mc_no]
+      ,(CHAR(CONVERT(INT, [Model_1])) + CHAR(CONVERT(INT, [Model_2])) + CHAR(CONVERT(INT, [Model_3])) +     
+       CHAR(CONVERT(INT, [Model_4])) + CHAR(CONVERT(INT, [Model_5])) + CHAR(CONVERT(INT, [Model_6])) +      
+       CHAR(CONVERT(INT, [Model_7])) + CHAR(CONVERT(INT, [Model_8])) + CHAR(CONVERT(INT, [Model_9])) +      
+       CHAR(CONVERT(INT, [Model_10])) + CHAR(CONVERT(INT, [Model_11])) + CHAR(CONVERT(INT, [Model_12]))) AS 
+model
+            ,[Daily_Total] as [dairy_total] ,[Daily_OK] as [dairy_ok] ,[Daily_NG] as [dairy_ng]
+          ,cast(((3600*24)/NULLIF([cycle_time], 0))*100  as decimal(20,0)) as UTL_target
+          ,[cycle_time] ,[Target_Utilize] as [target_utl]
+          ,cast(([Daily_OK]/NULLIF(cast(((3600*24)/NULLIF([cycle_time], 0))*100  as decimal(20,0)), 0))*100 as decimal(20,2)) as utl
+            ,[run_time],[wait_part_time] AS wait_time
+            ,[adjust_time]+[alarm_time]+[stop_time]+[error_time]+[full_part_time]+[plan_stop_time]+[set_up_time]+[wait_part_time] as DT
+            ,Case when [Daily_Total]=0 then 0
+            Else cast(([Daily_OK]/[Daily_Total])*100  as decimal(20,2))
+            End as yield
+            FROM [machine_data].[dbo].[DATA_PRODUCTION_ASSY]
+            where format(iif(DATEPART(HOUR, [registered_at]) < 8, dateadd(day, -1, [registered_at]), [registered_at]), 'yyyy-MM-dd') = '${start_date}' and DATEPART(HOUR,registered_at) = '7'
+            )
+            ,tb3 as (select [mfg_date],tb2.time,tb1.mc_no,tb1.model,[dairy_ok],[dairy_ng],dairy_total, SUM(tb1.UTL_target) as sum_utl,DT,wait_time,yield
+            ,cast(([dairy_total]/NULLIF(SUM(tb1.UTL_target), 0))*100  as decimal(20,2)) as UTL, [cycle_time]/100 
+as ct
+            from tb1
+            left join tb2
+            on tb1.mc_no = tb2.mc_no
+            group by tb1.mc_no,tb1.model,DT,wait_time,[mfg_date],[dairy_ok],[dairy_ng],dairy_total,yield,cycle_time,tb2.time)
+            select mfg_date,mc_no,model,dairy_ok as production_ok,[dairy_ng] as production_ng,[dairy_total] 
+as production_total,DT,wait_time,yield,UTL,ct
+            ,IIF(UTL < 80 ,'red',IIF(UTL < 80 ,'green','')) as bg_utl
+            ,IIF(yield < 80 ,'red','') as bg_yield
+            ,IIF(ct> 3.5,'red','') as bg_ct
+            ,CONVERT(char(5), time, 108) as at_time
+      from tb3
+            order by mc_no asc
         `
       );
       console.log("======= NOK Table Mornitoring =======");
