@@ -250,19 +250,21 @@ router.get("/qry_usage_ball_po_all_mc", async (req, res) => {
                 WHEN model LIKE '%DCL-850%' THEN 'DCL-850'
                 WHEN model LIKE '%L-630%' THEN 'L-630'
                 WHEN model LIKE '%DCL-614%' THEN 'DCL-614'
-                WHEN model LIKE '%1060%' THEN '1060'
-                WHEN model LIKE '%840%' THEN '840'
-                WHEN model LIKE '%730%' THEN '730'
-                WHEN model LIKE '%1889%' THEN '1889'
-                WHEN model LIKE '%DDR-830%' OR model LIKE '%DDR-83o%' THEN 'DDR-830'
-                WHEN model LIKE '%830%' OR model LIKE '%83o%' THEN '830'
-                WHEN model LIKE '%1260%' THEN '1260'
-                WHEN model LIKE '%940%' THEN '940'
+                WHEN model LIKE '%DDL-1060%' THEN 'DDL-1060'
                 WHEN model LIKE '%DDL-740%' THEN 'DDL-740'
                 WHEN model LIKE '%DDL-850%' THEN 'DDL-850'
                 WHEN model LIKE '%DDL-630%' THEN 'DDL-630'
                 WHEN model LIKE '%DDL-614%' THEN 'DDL-614'
-                WHEN model LIKE '%DDL-1060%' THEN 'DDL-1060'
+                WHEN model LIKE '%DDR-830%' OR model LIKE '%DDR-83o%' THEN 'DDR-830'
+                WHEN model LIKE '%DDRI-614%' THEN 'DDL-614'
+                WHEN model LIKE '%DCRI-614%' THEN 'DCL-614'
+                WHEN model LIKE '%1060%' THEN '1060'
+                WHEN model LIKE '%840%' THEN '840'
+                WHEN model LIKE '%730%' THEN '730'
+                WHEN model LIKE '%1889%' THEN '1889'
+                WHEN model LIKE '%830%' OR model LIKE '%83o%' THEN '830'
+                WHEN model LIKE '%1260%' THEN '1260'
+                WHEN model LIKE '%940%' THEN '940'
                 WHEN model LIKE '%608J%' OR model LIKE '%608 J%' OR model LIKE '%608-J%' THEN '608J'
                 WHEN model LIKE '%608C%' OR model LIKE '%608 C%' OR model LIKE '%608-C%' THEN '608C'
                 WHEN model LIKE '%608%' THEN '608'
@@ -279,8 +281,6 @@ router.get("/qry_usage_ball_po_all_mc", async (req, res) => {
                 WHEN model LIKE '%6001%' THEN '6001'  -- oversea
                 WHEN model LIKE '%6002J%' OR model LIKE '%6002 J%' OR model LIKE '%6002-J%' THEN '6002J'  -- oversea
                 WHEN model LIKE '%6002%' THEN '6002'  -- oversea
-                WHEN model LIKE '%DDRI-614%' THEN 'DDL-614'
-                WHEN model LIKE '%DCRI-614%' THEN 'DCL-614'
                 WHEN model LIKE '%6202%' THEN '6202'  -- oversea
               ELSE model
               END as series
