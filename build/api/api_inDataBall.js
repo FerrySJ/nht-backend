@@ -15,100 +15,9 @@ const schedule = require("node-schedule");
 // │    │    └─────────────── hour (0 - 23)
 // │    └──────────────────── minute (0 - 59)
 // └──***************──────── second (0 - 59, OPTIONAL)
-schedule.scheduleJob("17 * * * *", async function (req, res) {
+schedule.scheduleJob("2 * * * *", async function (req, res) {
   console.log("lllllllllllllllllllllll");
-  //   try {
-  //     // for (let i = 8; i <= 23; i++) {
-  //       // for (let i = 0; i <= 7; i++) {
-  //       // console.log(i);
-
-  //       // ถ้าต้องการข้อมูลเมื่อวาน => USE WHERE DATE -1 DAY
-  //       // ถ้าต้องการข้อมูลวันนี้ => USE WHERE GETDATE()
-  //     let data = await MBR_table.sequelize.query(
-  //       `SELECT [registered_at],UPPER([mc_no]) as mc_no,[process],[model],[spec],[d_str1],[d_str2],[rssi],[daily_ok],[daily_ng],[daily_tt]
-  //       ,[c1_ok],[c2_ok],[c3_ok],[c4_ok],[c5_ok],[c1_ng],[c2_ng],[c3_ng],[c4_ng],[c5_ng]
-  //       ,[cycle_t],[target_u],[error_t],[alarm_t],[run_t],[stop_t],[wait_p_t],[full_p_t],[adjust_t],[set_up_t],[plan_s_t]
-  //       ,[time_hr],[time_min],[w_ir_t],[w_or_t],[w_ball_t],[w_rtnr_t]
-  //       FROM [data_machine_assy].[dbo].[DATA_PRODUCTION_ASSY]
-  //       where CONVERT(DATE, format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd')) =  CONVERT(DATE, GETDATE()) -- '2024-07-17' --
-  //       AND  DATEPART(HOUR, registered_at) = DATEPART(HOUR, GETDATE())
-  //       order by mc_no asc,registered_at asc
-  //         `
-  //     );
-
-  //   // console.log(sentence.charCodeAt([index]));
-  //     // console.log(data[0]);
-  //     // console.log("l .. ",data[0].length);
-  //     let mc = []
-  //     for (let index = 0; index < data[0].length; index++) {
-  //       mc.push(data[0][index].mc_no)
-  //       let get_old = await MBR_table.sequelize.query(
-  //       ` SELECT [registered_at],[mc_no],[process],[rssi],[Daily_OK],[Daily_NG],[Daily_Total],[Ball_C1_OK],[Ball_C2_OK],[Ball_C3_OK],[Ball_C4_OK],[Ball_C5_OK],[Ball_C1_NG],[Ball_C2_NG],[Ball_C3_NG],[Ball_C4_NG],[Ball_C5_NG],[Ball_Check_Camera_Qty],[Ball_Check_Camera_Angle],[Separate_NG_1st],[MN_MI_RTNR_NG],[Pre_Press_NG],[Main_Press_NG],[Press_Check_NG],[RTNR_Camera_NG],[Cycle_Time],[Target_Utilize],[Error_Time],[Alarm_Time],[Run_Time],[Stop_Time],[Wait_Part_Time],[Full_Part_Time],[Adjust_Time],[Set_Up_Time],[Plan_Stop_Time],[Separate_NG_2nd],[Model_1],[Model_2],[Model_3],[Model_4],[Model_5],[Model_6],[Model_7],[Model_8],[Model_9],[Model_10],[Model_11],[Model_12],[D2_RTNR_NG],[D1_RTNR_NG],[Spec_1],[Spec_2],[Spec_3],[Spec_4],[Spec_5],[Spec_6],[Spec_7],[Spec_8],[Spec_9],[Spec_10],[Spec_11],[Spec_12],[Time_Hr],[Time_Min]
-  //       FROM [machine_data].[dbo].[DATA_PRODUCTION_ASSY]
-  //       WHERE  CAST(CONVERT(DATE, format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd')) AS DATE) = '2024-07-16' --CAST(DATEADD(DAY, -1, GETDATE()) AS DATE) -- '2024-07-15'--
-  //       AND  DATEPART(HOUR, registered_at) = 7
-  //       AND mc_no LIKE '${data[0][index].mc_no}'
-  //       order by mc_no asc,registered_at asc
-  //       `
-  //       );
-  //       const date = new Date(data[0][index].registered_at);
-
-  //       // Function to pad numbers to two digits
-  //       const pad = (num) => String(num).padStart(2, '0');
-
-  //       // Function to format the date
-  //       const formatDate = (date) => {
-  //         const year = date.getUTCFullYear();
-  //         const month = pad(date.getUTCMonth() + 1); // Months are zero-based
-  //         const day = pad(date.getUTCDate());
-  //         const hours = pad(date.getUTCHours());
-  //         const minutes = pad(date.getUTCMinutes());
-  //         const seconds = pad(date.getUTCSeconds());
-  //         const milliseconds = String(date.getUTCMilliseconds()).padStart(3, '0');
-
-  //         return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
-  //       };
-
-  //       const formattedDate = formatDate(date);
-  //       console.log(formattedDate); // Output: 2024-07-10 14:00:10.743
-
-  //       if (get_old[0].length > 0) {
-  //         let oldRecord = get_old[0][0]; // Assuming only one record is returned
-  //         await MBR_table.sequelize.query(`INSERT INTO [machine_data].[dbo].[DATA_PRODUCTION_ASSY] ([registered_at],[mc_no],[process],[rssi],[Daily_OK],[Daily_NG],[Daily_Total],[Ball_C1_OK],[Ball_C2_OK],[Ball_C3_OK],[Ball_C4_OK],[Ball_C5_OK],[Ball_C1_NG],[Ball_C2_NG],[Ball_C3_NG],[Ball_C4_NG],[Ball_C5_NG],[Ball_Check_Camera_Qty],[Ball_Check_Camera_Angle],[Separate_NG_1st],[MN_MI_RTNR_NG],[Pre_Press_NG],[Main_Press_NG],[Press_Check_NG],[RTNR_Camera_NG],[Cycle_Time],[Target_Utilize],[Error_Time],[Alarm_Time],[Run_Time],[Stop_Time],[Wait_Part_Time],[Full_Part_Time],[Adjust_Time],[Set_Up_Time],[Plan_Stop_Time],[Separate_NG_2nd],[Model_1],[Model_2],[Model_3],[Model_4],[Model_5],[Model_6],[Model_7],[Model_8],[Model_9],[Model_10],[Model_11],[Model_12],[D2_RTNR_NG],[D1_RTNR_NG],[Spec_1],[Spec_2],[Spec_3],[Spec_4],[Spec_5],[Spec_6],[Spec_7],[Spec_8],[Spec_9],[Spec_10],[Spec_11],[Spec_12],[Time_Hr],[Time_Min])
-  //         VALUES ('${formattedDate}','${data[0][index].mc_no}','${data[0][index].process}','${data[0][index].rssi}','${data[0][index].daily_ok}','${data[0][index].daily_ng}','${data[0][index].daily_tt}'
-  //         ,'${data[0][index].c1_ok}','${data[0][index].c2_ok}','${data[0][index].c3_ok}','${data[0][index].c4_ok}','${data[0][index].c5_ok}'
-  //         ,'${data[0][index].c1_ng}','${data[0][index].c2_ng}','${data[0][index].c3_ng}','${data[0][index].c4_ng}','${data[0][index].c5_ng}'
-  //         ,'${oldRecord.Ball_Check_Camera_Qty}','${oldRecord.Ball_Check_Camera_Angle}','${oldRecord.Separate_NG_1st}','${oldRecord.MN_MI_RTNR_NG}','${oldRecord.Pre_Press_NG}','${oldRecord.Main_Press_NG}'
-  //         ,'${oldRecord.Press_Check_NG}','${oldRecord.RTNR_Camera_NG}','${data[0][index].cycle_t}','${data[0][index].target_u}','${data[0][index].error_t}','${data[0][index].alarm_t}'
-  //         ,'${data[0][index].run_t}','${data[0][index].stop_t}','${data[0][index].wait_p_t}','${data[0][index].full_p_t}','${data[0][index].adjust_t}','${data[0][index].set_up_t}'
-  //         ,'${data[0][index].plan_s_t}','${oldRecord.Separate_NG_2nd}','${oldRecord.Model_1}','${oldRecord.Model_2}','${oldRecord.Model_3}','${oldRecord.Model_4}','${oldRecord.Model_5}'
-  //         ,'${oldRecord.Model_6}','${oldRecord.Model_7}','${oldRecord.Model_8}','${oldRecord.Model_9}','${oldRecord.Model_10}','${oldRecord.Model_11}'
-  //         ,'${oldRecord.Model_12}','${oldRecord.D2_RTNR_NG}','${oldRecord.D1_RTNR_NG}','${oldRecord.Spec_1}','${oldRecord.Spec_2}','${oldRecord.Spec_3}','${oldRecord.Spec_4}'
-  //         ,'${oldRecord.Spec_5}','${oldRecord.Spec_6}','${oldRecord.Spec_7}','${oldRecord.Spec_8}','${oldRecord.Spec_9}','${oldRecord.Spec_10}','${oldRecord.Spec_11}'
-  //         ,'${oldRecord.Spec_12}','${data[0][index].time_hr}','${data[0][index].time_min}')`)
-  //       }
-
-  //   }
-  // // }
-
-  //     // return res.json(
-  //       return {
-  //       mfgdate: moment().format("YYYY-MM-DD"),
-  //       time: moment().format("HH:mm:ss"),
-  //       api_result: constance.result_ok,
-  //      }
-  //     // );
-  //   } catch (error) {
-  //     console.log("=======error =============", error);
-  //     //return //res.json(
-  //       return { error, api_result: constance.result_nok }
-  //      // );
-  //   }
-
   try {
-    // for (let i = 8; i <= 23; i++) {
-    // for (let i = 0; i <= 7; i++) {
-    // console.log(i);
     let day1 = "";
     let day2 = "";
     const currentHour = parseInt(moment().format("HH"), 10);
@@ -216,19 +125,6 @@ schedule.scheduleJob("17 * * * *", async function (req, res) {
            
           
         }
-        // await MBR_table.sequelize
-        //   .query(`INSERT INTO [machine_data].[dbo].[DATA_PRODUCTION_ASSY] ([registered_at],[mc_no],[process],[rssi],[Daily_OK],[Daily_NG],[Daily_Total],[Ball_C1_OK],[Ball_C2_OK],[Ball_C3_OK],[Ball_C4_OK],[Ball_C5_OK],[Ball_C1_NG],[Ball_C2_NG],[Ball_C3_NG],[Ball_C4_NG],[Ball_C5_NG],[Ball_Check_Camera_Qty],[Ball_Check_Camera_Angle],[Separate_NG_1st],[MN_MI_RTNR_NG],[Pre_Press_NG],[Main_Press_NG],[Press_Check_NG],[RTNR_Camera_NG],[Cycle_Time],[Target_Utilize],[Error_Time],[Alarm_Time],[Run_Time],[Stop_Time],[Wait_Part_Time],[Full_Part_Time],[Adjust_Time],[Set_Up_Time],[Plan_Stop_Time],[Separate_NG_2nd],[Model_1],[Model_2],[Model_3],[Model_4],[Model_5],[Model_6],[Model_7],[Model_8],[Model_9],[Model_10],[Model_11],[Model_12],[D2_RTNR_NG],[D1_RTNR_NG],[Spec_1],[Spec_2],[Spec_3],[Spec_4],[Spec_5],[Spec_6],[Spec_7],[Spec_8],[Spec_9],[Spec_10],[Spec_11],[Spec_12],[Time_Hr],[Time_Min])
-        // VALUES ('${formattedDate}','${data[0][index].mc_no}','${data[0][index].process}','${data[0][index].rssi}','${data[0][index].daily_ok}','${data[0][index].daily_ng}','${data[0][index].daily_tt}'
-        // ,'${data[0][index].c1_ok}','${data[0][index].c2_ok}','${data[0][index].c3_ok}','${data[0][index].c4_ok}','${data[0][index].c5_ok}'
-        // ,'${data[0][index].c1_ng}','${data[0][index].c2_ng}','${data[0][index].c3_ng}','${data[0][index].c4_ng}','${data[0][index].c5_ng}'
-        // ,'${oldRecord.Ball_Check_Camera_Qty}','${oldRecord.Ball_Check_Camera_Angle}','${oldRecord.Separate_NG_1st}','${oldRecord.MN_MI_RTNR_NG}','${oldRecord.Pre_Press_NG}','${oldRecord.Main_Press_NG}'
-        // ,'${oldRecord.Press_Check_NG}','${oldRecord.RTNR_Camera_NG}','${data[0][index].cycle_t}','${data[0][index].target_u}','${data[0][index].error_t}','${data[0][index].alarm_t}'
-        // ,'${data[0][index].run_t}','${data[0][index].stop_t}','${data[0][index].wait_p_t}','${data[0][index].full_p_t}','${data[0][index].adjust_t}','${data[0][index].set_up_t}'
-        // ,'${data[0][index].plan_s_t}','${oldRecord.Separate_NG_2nd}','${oldRecord.Model_1}','${oldRecord.Model_2}','${oldRecord.Model_3}','${oldRecord.Model_4}','${oldRecord.Model_5}'
-        // ,'${oldRecord.Model_6}','${oldRecord.Model_7}','${oldRecord.Model_8}','${oldRecord.Model_9}','${oldRecord.Model_10}','${oldRecord.Model_11}'
-        // ,'${oldRecord.Model_12}','${oldRecord.D2_RTNR_NG}','${oldRecord.D1_RTNR_NG}','${oldRecord.Spec_1}','${oldRecord.Spec_2}','${oldRecord.Spec_3}','${oldRecord.Spec_4}'
-        // ,'${oldRecord.Spec_5}','${oldRecord.Spec_6}','${oldRecord.Spec_7}','${oldRecord.Spec_8}','${oldRecord.Spec_9}','${oldRecord.Spec_10}','${oldRecord.Spec_11}'
-        // ,'${oldRecord.Spec_12}','${data[0][index].time_hr}','${data[0][index].time_min}')`);
       }
     }
     // }
