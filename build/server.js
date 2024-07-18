@@ -25,6 +25,7 @@ app.use("/api/api_nhtMMS", require("./api/api_nhtMMS"));
 app.use("/api/api_nhtSchedule", require("./api/api_nhtSchedule")); 
 app.use("/api/api_upload_stock", require("./api/api_upload_stock")); 
 app.use("/api/api_autopo", require("./api/api_autopo")); 
+app.use("/api/api_inDataBall", require("./api/api_inDataBall")); 
 //================================================
 app.listen(2005, () => { // run server
   // XX:8001
