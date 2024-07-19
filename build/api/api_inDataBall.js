@@ -21,14 +21,18 @@ schedule.scheduleJob("2 * * * *", async function (req, res) {
     let day1 = "";
     let day2 = "";
     const currentHour = parseInt(moment().format("HH"), 10);
-
-    if (currentHour >= 8 && currentHour <= 23) {
-      day1 = `CONVERT(DATE, GETDATE())`;
-      day2 = `CONVERT(DATE, DATEADD(day, -1, GETDATE()))`;
-    } else {
-      day1 = `CONVERT(DATE, DATEADD(day, -1, GETDATE()))`;
-      day2 = `CONVERT(DATE, DATEADD(day, -2, GETDATE()))`;
-    }
+  console.log("Current Hour:", currentHour);
+  
+  if (currentHour >= 8 && currentHour <= 23) {
+    day1 = `CONVERT(DATE, GETDATE())`;
+    day2 = `CONVERT(DATE, DATEADD(day, -1, GETDATE()))`;
+  } else {
+    day1 = `CONVERT(DATE, DATEADD(day, -1, GETDATE()))`;
+    day2 = `CONVERT(DATE, DATEADD(day, -2, GETDATE()))`;
+  }
+  
+  console.log("Day1:", day1);
+  console.log("Day2:", day2);
 
     // ถ้าต้องการข้อมูลเมื่อวาน => USE WHERE DATE -1 DAY
     // ถ้าต้องการข้อมูลวันนี้ => USE WHERE GETDATE()
@@ -78,7 +82,7 @@ schedule.scheduleJob("2 * * * *", async function (req, res) {
       };
 
       const formattedDate = formatDate(date);
-      // console.log(formattedDate); // Output: 2024-07-10 14:00:10.743
+      console.log(moment().format("YYYY-MM-DD HH:mm:ss"), "...", formattedDate); 
 
       if (get_old[0].length > 0) {
          if (data[0][index].model === "") {
