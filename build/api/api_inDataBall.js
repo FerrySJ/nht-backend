@@ -20,19 +20,20 @@ schedule.scheduleJob("2 * * * *", async function (req, res) {
   try {
     let day1 = "";
     let day2 = "";
-    const currentHour = parseInt(moment().format("HH"), 10);
-  console.log("Current Hour:", currentHour);
-  
-  if (currentHour >= 8 && currentHour <= 23) {
-    day1 = `CONVERT(DATE, GETDATE())`;
-    day2 = `CONVERT(DATE, DATEADD(day, -1, GETDATE()))`;
-  } else {
-    day1 = `CONVERT(DATE, DATEADD(day, -1, GETDATE()))`;
-    day2 = `CONVERT(DATE, DATEADD(day, -2, GETDATE()))`;
-  }
-  
-  console.log("Day1:", day1);
-  console.log("Day2:", day2);
+    const currentHour = parseInt(moment().utc().format("HH"), 10);
+    console.log("Current Hour (UTC):", currentHour);
+    const localHour = (currentHour + 7) % 24;
+    console.log("Current Hour (Local):", localHour);
+
+    if (localHour >= 8 && localHour <= 23) {
+      day1 = `CONVERT(DATE, GETDATE())`;
+      day2 = `CONVERT(DATE, DATEADD(day, -1, GETDATE()))`;
+    } else {
+      day1 = `CONVERT(DATE, DATEADD(day, -1, GETDATE()))`;
+      day2 = `CONVERT(DATE, DATEADD(day, -2, GETDATE()))`;
+    }
+    console.log("Day1:", day1);
+    console.log("Day2:", day2);
 
     // ถ้าต้องการข้อมูลเมื่อวาน => USE WHERE DATE -1 DAY
     // ถ้าต้องการข้อมูลวันนี้ => USE WHERE GETDATE()
