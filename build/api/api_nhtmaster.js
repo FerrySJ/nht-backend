@@ -108,4 +108,25 @@ router.get("/master_year", async (req, res) => {
   }
 });
 
+// Auto noise
+// master machine
+router.get("/master_MC_AutoNoise", async (req, res) => {
+  try {
+    let result = await MBR_table.sequelize.query(`
+    SELECT distinct UPPER([mc_no]) as [machine_no]
+    FROM [data_machine_an].[dbo].[DATA_PRODUCTION_AN]
+    order by UPPER([mc_no])  asc
+      `);
+
+    res.json({
+      result: result,
+      api_result: constance.OK,
+    });
+  } catch (error) {
+    res.json({
+      result: error,
+      api_result: constance.NOK,
+    });
+  }
+});
 module.exports = router;

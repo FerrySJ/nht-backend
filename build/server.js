@@ -16,7 +16,6 @@ app.use(express.static(path.join(__dirname, "./files")));
 app.use(cors());
 const router = require("./api/api_test1");
 app.use("/", router);
-// app.use("/user", require("./api/api_user"));
 app.use("/api", require("./api/api_test1")); 
 app.use("/api/api_nhtMBR", require("./api/api_nhtMBR")); 
 app.use("/api/api_nhtMaster", require("./api/api_nhtmaster")); 
@@ -26,6 +25,7 @@ app.use("/api/api_nhtSchedule", require("./api/api_nhtSchedule"));
 app.use("/api/api_upload_stock", require("./api/api_upload_stock")); 
 app.use("/api/api_autopo", require("./api/api_autopo")); 
 app.use("/api/api_inDataBall", require("./api/api_inDataBall")); 
+app.use("/api/api_nhtAN", require("./api/api_nhtAN")); 
 //================================================
 app.listen(2005, () => { // run server
   // XX:8001

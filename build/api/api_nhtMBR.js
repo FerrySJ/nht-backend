@@ -7186,7 +7186,7 @@ ORDER BY registered_at asc
   ,Case when [Daily_Total]=0 then 0
   Else cast(([Daily_OK]/[Daily_Total])*100  as decimal(20,2)) 
   End as yield
-  ,0 as scal_min ,2400as scal_max,80 as scal_min_YR ,110 as scal_max_YR
+  ,0 as scal_min ,2400as scal_max,80 as scal_min_YR ,100 as scal_max_YR
     FROM [machine_data].[dbo].[DATA_PRODUCTION_ASSY]
 WHERE 
   mc_no = '${mc_no}'
@@ -7388,8 +7388,8 @@ router.get("/MMS_downtime_MBRC_MD/:mc_no/:start_date", async (req, res) => {
 router.post("/MBRC_mornitoring_all/:start_date", async (req, res) => {
   try {
     let { start_date } = req.params;
-  // console.log(req.body, start_date,moment().format("yyyy-MM-DD"));
-//   const hour = parseInt(moment().format("HH"), 10);
+  console.log(req.body, start_date,moment().format("yyyy-MM-DD"));
+  const hour = parseInt(moment().format("HH"), 10);
 // if (hour >= 0 && hour <= 7) {
 //   console.log("8888 >> ", hour);
 // } else {
@@ -7412,7 +7412,7 @@ router.post("/MBRC_mornitoring_all/:start_date", async (req, res) => {
       , MAX(CASE WHEN RN = 1 THEN [dairy_total] ELSE NULL END) - COALESCE(MAX(CASE WHEN RN = 2 THEN [dairy_total] ELSE NULL END), 0) PROD_DIFF
       --, MAX(CASE WHEN RN = 1 THEN [dairy_ok] ELSE NULL END) - COALESCE(MAX(CASE WHEN RN = 2 THEN [dairy_ok] ELSE NULL END), 0) PROD_DIFF
         ,MAX(CASE WHEN RN = 1 THEN [adjust_time]+[alarm_time]+[stop_time]+[error_time]+[full_part_time]+[plan_stop_time]+[set_up_time]+[wait_part_time]  ELSE NULL END) DT
-        , MAX(CASE WHEN RN = 1 THEN cast((3600/NULLIF([cycle_time], 0))*100  as decimal(20,0)) ELSE NULL END) UTL_target
+        , MAX(CASE WHEN RN = 1 THEN cast((3600/NULLIF([Target_Utilize], 0))*100  as decimal(20,0)) ELSE NULL END) UTL_target
       , MAX(CASE WHEN RN = 1 THEN [cycle_time]/100 ELSE NULL END)  ct
       , MAX(CASE WHEN RN = 1 THEN (Case when [dairy_total]=0 then 0
                         Else cast(([dairy_ok]/[dairy_total])*100  as decimal(20,2))
@@ -7424,7 +7424,7 @@ router.post("/MBRC_mornitoring_all/:start_date", async (req, res) => {
                 CHAR(CONVERT(INT, [Model_4])) + CHAR(CONVERT(INT, [Model_5])) + CHAR(CONVERT(INT, [Model_6])) +     
                 CHAR(CONVERT(INT, [Model_7])) + CHAR(CONVERT(INT, [Model_8])) + CHAR(CONVERT(INT, [Model_9])) +     
                 CHAR(CONVERT(INT, [Model_10])) + CHAR(CONVERT(INT, [Model_11])) + CHAR(CONVERT(INT, [Model_12]))) AS model,[Daily_OK] as [dairy_ok],[Daily_NG] as [dairy_ng],[Daily_Total] as [dairy_total],[registered_at],[Cycle_Time] as [cycle_time]
-        ,[error_time],[alarm_time],[stop_time],[wait_part_time],[full_part_time],[adjust_time],[set_up_time],[plan_stop_time]
+        ,[error_time],[alarm_time],[stop_time],[wait_part_time],[full_part_time],[adjust_time],[set_up_time],[plan_stop_time],[Target_Utilize]
           ,ROW_NUMBER() OVER (PARTITION BY [mc_no] ORDER BY [registered_at] DESC) RN
           FROM [machine_data].[dbo].[DATA_PRODUCTION_ASSY]
         where format(iif(DATEPART(HOUR, [registered_at]) < 8, dateadd(day, -1, [registered_at]), [registered_at]), 'yyyy-MM-dd') = '${start_date}'
@@ -7477,7 +7477,7 @@ const totalSum = Object.values(result_prod_total).reduce((acc, curr) => acc + cu
        CHAR(CONVERT(INT, [Model_7])) + CHAR(CONVERT(INT, [Model_8])) + CHAR(CONVERT(INT, [Model_9])) +      
        CHAR(CONVERT(INT, [Model_10])) + CHAR(CONVERT(INT, [Model_11])) + CHAR(CONVERT(INT, [Model_12]))) AS 
 model
-       ,cast(((3600*24)/NULLIF([cycle_time], 0))*100  as decimal(20,0)) as UTL_target
+       ,cast(((3600*24)/NULLIF([Target_Utilize], 0))*100  as decimal(20,0)) as UTL_target
           FROM [machine_data].[dbo].[DATA_PRODUCTION_ASSY]
           where format(iif(DATEPART(HOUR, [registered_at]) < 8, dateadd(day, -1, [registered_at]), [registered_at]), 'yyyy-MM-dd') = '${start_date}' and DATEPART(HOUR,registered_at) = '7'
           )
@@ -7491,9 +7491,9 @@ model
        CHAR(CONVERT(INT, [Model_10])) + CHAR(CONVERT(INT, [Model_11])) + CHAR(CONVERT(INT, [Model_12]))) AS 
 model
             ,[Daily_Total] as [dairy_total] ,[Daily_OK] as [dairy_ok] ,[Daily_NG] as [dairy_ng]
-          ,cast(((3600*24)/NULLIF([cycle_time], 0))*100  as decimal(20,0)) as UTL_target
+          ,cast(((3600*24)/NULLIF([Target_Utilize], 0))*100  as decimal(20,0)) as UTL_target
           ,[cycle_time] ,[Target_Utilize] as [target_utl]
-          ,cast(([Daily_OK]/NULLIF(cast(((3600*24)/NULLIF([cycle_time], 0))*100  as decimal(20,0)), 0))*100 as decimal(20,2)) as utl
+          ,cast(([Daily_OK]/NULLIF(cast(((3600*24)/NULLIF([Target_Utilize], 0))*100  as decimal(20,0)), 0))*100 as decimal(20,2)) as utl
             ,[run_time],[wait_part_time] AS wait_time
             ,[adjust_time]+[alarm_time]+[stop_time]+[error_time]+[full_part_time]+[plan_stop_time]+[set_up_time]+[wait_part_time] as DT
             ,Case when [Daily_Total]=0 then 0
