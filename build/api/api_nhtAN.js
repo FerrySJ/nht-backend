@@ -32,8 +32,7 @@ router.post("/MMS_prod_yield_AN/:mc_no/:start_date", async (req, res) => {
   ORDER BY registered_at ASC
       `);
 
-    let resultdata_UTL = await MBR_table.sequelize
-      .query(`SELECT [registered_at]
+    let resultdata_UTL = await MBR_table.sequelize.query(`SELECT [registered_at]
       ,format(iif(DATEPART(HOUR, [registered_at]) < 8, dateadd(day, -1, [registered_at]), [registered_at]), 'yyyy-MM-dd') as [mfg_date]
       ,[mc_no],[process],[model],[spec],[d_str1],[d_str2],[rssi],[ok1],[ok2],[ag],[ng],[mix],[tt]
       ,[cycle],[target],[error],[alarm],[run],[stop],[wait_p],[full_p],[adjust],[set_up],[plan_s],[spare1],[spare2],[spare3],[spare4],[hr],[min]
@@ -71,7 +70,7 @@ router.post("/MMS_prod_yield_AN/:mc_no/:start_date", async (req, res) => {
       const index_data = arrayData[0].ok1;
       // console.log("iii",index_data);
       await seriesOutput.push(index_data);
-      
+
       for (let i = 0; i < arrayData.length - 1; i++) {
         // console.log((i+1).toString() + " : " + (arrayData[i+1].ok1 - arrayData[i].ok1).toString())
         await seriesOutput.push(
@@ -86,7 +85,7 @@ router.post("/MMS_prod_yield_AN/:mc_no/:start_date", async (req, res) => {
             arrayData[i].target) *
           100
         ).toString();
-    }
+      }
       // console.log("seriesOutput", seriesOutput);
       for (let index = 0; index < arrayData_yield.length; index++) {
         const item = arrayData_yield[index];
@@ -127,22 +126,22 @@ router.post("/MMS_prod_yield_AN/:mc_no/:start_date", async (req, res) => {
         type: "line",
         data: seriesTarget,
       };
-  
+
       // console.log(Math.max(...array))
       // console.log("seriesOutput_new ====>", seriesYield.splice(seriesYield.indexOf( 77 ), 1));
       let seriesNew = [seriesOutput_new, seriesYieldrate_new, seriesTarget_new];
       // console.log("click PT result =====>, seriesNew" ,seriesOutput);
-      
-    res.json({
-      resultOutput_MBR: seriesNew,
-      result_PD: seriesOutput,
-      result_TG: seriesYield,
-      result: resultdata, // chart PD
-      result_box: resultdata_UTL,
-      result_AVG_utl: resultAVG_UTL,
-      result_ok: seriesOutput,
-      max_prod: final_max_prod,
-    });
+
+      res.json({
+        resultOutput_MBR: seriesNew,
+        result_PD: seriesOutput,
+        result_TG: seriesYield,
+        result: resultdata, // chart PD
+        result_box: resultdata_UTL,
+        result_AVG_utl: resultAVG_UTL,
+        result_ok: seriesOutput,
+        max_prod: final_max_prod,
+      });
     } else {
       // console.log("0000");
       res.json({
@@ -156,7 +155,7 @@ router.post("/MMS_prod_yield_AN/:mc_no/:start_date", async (req, res) => {
         max_prod: 0,
       });
     }
-   
+
     // console.log(resultdata[0][0].model);
     // console.log("lllll", resultOutput_MBR);
   } catch (error) {
@@ -227,14 +226,13 @@ router.get("/chart_downtime_AN/:mc_no/:start_date", async (req, res) => {
 });
 
 // production total by last time
-router.post("/MMS_prod_total_yield_AN/:date/:mc/:hour",
-  async (req, res) => {
-    let { mc } = req.params;
-    let { hour } = req.params;
-    let { date } = req.params;
-    try {
-      let result = await MBR_table.sequelize.query(
-        `WITH RankedData AS (
+router.post("/MMS_prod_total_yield_AN/:date/:mc/:hour", async (req, res) => {
+  let { mc } = req.params;
+  let { hour } = req.params;
+  let { date } = req.params;
+  try {
+    let result = await MBR_table.sequelize.query(
+      `WITH RankedData AS (
           SELECT
             [registered_at],
             format([registered_at],'HH:mm') as time,model,
@@ -274,15 +272,15 @@ router.post("/MMS_prod_total_yield_AN/:date/:mc/:hour",
         ORDER BY [mc_no] ASC, [registered_at] ASC;
       
       `
-      );
+    );
 
-      const rawData = result[0];
-      const formattedData = rawData.map((row) => row.diff_dairy_ok.toString());
-      const Data_MC = rawData.map((row) => row.mc_no.toString());
-      const data_Yield = rawData.map((row) => row.yield.toString());
-      const data_Target = rawData.map((row) => row.UTL_target.toString());
+    const rawData = result[0];
+    const formattedData = rawData.map((row) => row.diff_dairy_ok.toString());
+    const Data_MC = rawData.map((row) => row.mc_no.toString());
+    const data_Yield = rawData.map((row) => row.yield.toString());
+    const data_Target = rawData.map((row) => row.UTL_target.toString());
 
-      let final_max_prod =
+    let final_max_prod =
       Math.max(...formattedData) > 2000 ? Math.max(...formattedData) : 2400;
     // console.log(Math.max(...formattedData) > 2000 ? Math.max(...formattedData) : 2400);
     if (
@@ -298,64 +296,63 @@ router.post("/MMS_prod_total_yield_AN/:date/:mc/:hour",
     } else {
       final_max_prod = 2400;
     }
-      // console.log(data_Target);
-      const chartData = [
-        {
-          name: "Production",
-          type: "column",
-          data: formattedData,
-        },
-        {
-          name: "Target",
-          type: "column",
-          data: data_Target,
-        },
-        {
-          name: "Yield Rate",
-          type: "line",
-          data: data_Yield,
-        },
-      ];
-      const ProdTotal = rawData.reduce((sum, item) => {
-        // Convert dairy_ok to number and add to the sum
-        sum += Number(item.dairy_ok);
-        return sum;
-      }, 0);
-      
-      // console.log('Total dairy_ok:', ProdTotal);
-      res.json({
-        // resultBall: BallUsage[0],
-        result: result[0],
-        result_data: chartData,
-        result_mc: Data_MC,
-        ProdTotal:ProdTotal,
-        scal_max: final_max_prod,
+    // console.log(data_Target);
+    const chartData = [
+      {
+        name: "Production",
+        type: "column",
+        data: formattedData,
+      },
+      {
+        name: "Target",
+        type: "column",
+        data: data_Target,
+      },
+      {
+        name: "Yield Rate",
+        type: "line",
+        data: data_Yield,
+      },
+    ];
+    const ProdTotal = rawData.reduce((sum, item) => {
+      // Convert dairy_ok to number and add to the sum
+      sum += Number(item.dairy_ok);
+      return sum;
+    }, 0);
 
-        // resultTarget_turn: seriesTarget_new,
-      });
-    } catch (error) {
-      // console.log(error);
-      res.json({
-        error,
-        api_result: constance.result_nok,
-      });
-    }
+    // console.log('Total dairy_ok:', ProdTotal);
+    res.json({
+      // resultBall: BallUsage[0],
+      result: result[0],
+      result_data: chartData,
+      result_mc: Data_MC,
+      ProdTotal: ProdTotal,
+      scal_max: final_max_prod,
+
+      // resultTarget_turn: seriesTarget_new,
+    });
+  } catch (error) {
+    // console.log(error);
+    res.json({
+      error,
+      api_result: constance.result_nok,
+    });
   }
-);
+});
 
 // table total mornitor mc
 router.post("/autoNoise_mornitoring_all/:start_date", async (req, res) => {
   try {
     let { start_date } = req.params;
-  console.log(req.body, start_date,moment().format("yyyy-MM-DD"));
-  const hour = parseInt(moment().format("HH"), 10);
-// if (hour >= 0 && hour <= 7) {
-//   console.log("8888 >> ", hour);
-// } else {
-//   console.log("lllll");
-// }
-  if (start_date === moment().format("yyyy-MM-DD")) {
-    // if (req.body.yesterday != start_date) {
+    console.log(req.body, start_date, moment().format("yyyy-MM-DD"));
+    const hour = parseInt(moment().format("HH"), 10);
+    // if (hour >= 0 && hour <= 7) {
+    //   console.log("8888 >> ", hour);
+    // } else {
+    //   console.log("lllll");
+    // }
+    if (start_date === moment().format("yyyy-MM-DD")) {
+      // if (req.body.yesterday != start_date) {
       console.log("ok");
       // ใช้ [dairy_total] หา UTL
       let result = await MBR_table.sequelize.query(`
@@ -399,13 +396,14 @@ router.post("/autoNoise_mornitoring_all/:start_date", async (req, res) => {
       console.log("======= DATA TODAY Table Mornitoring =======");
       // SUM Prod
       const data1 = result[0];
-      
+
       const sumProductionTotalsByModel = (data) => {
         return data.reduce((acc, item) => {
           // แยกตัวอักษรและตัวเลขใน mc_no
           const model = item.mc_no.match(/^[A-Z]+/)[0];
-          const productionTotal = item.production_total !== null ? item.production_total : 0;
-          
+          const productionTotal =
+            item.production_total !== null ? item.production_total : 0;
+
           if (!acc[model]) {
             acc[model] = 0;
           }
@@ -413,19 +411,20 @@ router.post("/autoNoise_mornitoring_all/:start_date", async (req, res) => {
           return acc;
         }, {});
       };
-      
+
       const result_prod_total = sumProductionTotalsByModel(data1);
       // console.log(result_prod_total);
 
-const totalSum = Object.values(result_prod_total).reduce((acc, curr) => acc + curr, 0);
+      const totalSum = Object.values(result_prod_total).reduce(
+        (acc, curr) => acc + curr,
+        0
+      );
 
-// console.log("sum",totalSum); // Output: 599929
-
-      
+      // console.log("sum",totalSum); // Output: 599929
       res.json({
         result: result,
         result_prod_total: result_prod_total,
-        totalSum:totalSum,
+        totalSum: totalSum,
         api_result: constance.result_ok,
       });
     } else {
@@ -462,13 +461,14 @@ const totalSum = Object.values(result_prod_total).reduce((acc, curr) => acc + cu
       console.log("======= NOK Table Mornitoring =======");
       // SUM Prod
       const data1 = result[0];
-      
+
       const sumProductionTotalsByModel = (data) => {
         return data.reduce((acc, item) => {
           // แยกตัวอักษรและตัวเลขใน mc_no
           const model = item.mc_no.match(/^[A-Z]+/)[0];
-          const productionTotal = item.production_total !== null ? item.production_total : 0;
-          
+          const productionTotal =
+            item.production_total !== null ? item.production_total : 0;
+
           if (!acc[model]) {
             acc[model] = 0;
           }
@@ -476,10 +476,13 @@ const totalSum = Object.values(result_prod_total).reduce((acc, curr) => acc + cu
           return acc;
         }, {});
       };
-      
+
       const result_prod_total = sumProductionTotalsByModel(data1);
-const totalSum = Object.values(result_prod_total).reduce((acc, curr) => acc + curr, 0);
-res.json({
+      const totalSum = Object.values(result_prod_total).reduce(
+        (acc, curr) => acc + curr,
+        0
+      );
+      res.json({
         result: result,
         result_prod_total: result_prod_total,
         totalSum: totalSum,

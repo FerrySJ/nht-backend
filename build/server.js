@@ -26,6 +26,8 @@ app.use("/api/api_upload_stock", require("./api/api_upload_stock"));
 app.use("/api/api_autopo", require("./api/api_autopo")); 
 app.use("/api/api_inDataBall", require("./api/api_inDataBall")); 
 app.use("/api/api_nhtAN", require("./api/api_nhtAN")); 
+app.use("/api/api_mbr_status", require("./api/api_nhtMBR_Status")); 
+
 //================================================
 app.listen(2005, () => { // run server
   // XX:8001

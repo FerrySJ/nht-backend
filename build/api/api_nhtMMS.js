@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const bcrypt = require("bcryptjs");
 const constance = require("../constance/constance");
 const moment = require("moment");
 
