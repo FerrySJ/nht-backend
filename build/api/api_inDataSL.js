@@ -17,7 +17,7 @@ router.post("/get_data_sl", async (req, res) => {
       ,[basket_cnt],[ng_input],[end_cond],[shift_a_ok],[shift_b_ok],[shift_c_ok],[shift_a_ng],[shift_b_ng],[shift_c_ng]
       ,[total_cnt],[total_utilize],[master]
       FROM [data_machine_sl].[dbo].[DATA_PRODUCTION_SL]
-      where FORMAT(registered_at, 'yyyy-MM-dd') = '${day}' -- FORMAT(GETDATE(), 'yyyy-MM-dd')
+      where FORMAT(occurred, 'yyyy-MM-dd') = '${day}' -- FORMAT(GETDATE(), 'yyyy-MM-dd')
       order by registered_at asc`
     );
     res.json({
