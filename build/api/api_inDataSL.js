@@ -10,7 +10,7 @@ router.get("/getresult", (req, res) => {
 });
 
 router.post("/get_data_sl", async (req, res) => {
-  let day = moment().format("YYYY-MM-DD");
+  let day = req.body.day;//moment().format("YYYY-MM-DD");
   try {
     let result = await MBR_table.sequelize.query(
       `SELECT [registered_at],[occurred],[mc_no],[process],[model],[lot],[d_str1],[d_str2],[rssi],[shift],[double_part]
