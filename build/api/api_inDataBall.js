@@ -15,7 +15,8 @@ const schedule = require("node-schedule");
 // │    │    └─────────────── hour (0 - 23)
 // │    └──────────────────── minute (0 - 59)
 // └──***************──────── second (0 - 59, OPTIONAL)
-schedule.scheduleJob("2 * * * *", async function (req, res) {
+// ทำเพื่อใช้ data จาก tb [data_machine_assy].[dbo].[DATA_PRODUCTION_ASSY] (OLD)
+schedule.scheduleJob("- * * * *", async function (req, res) {
   console.log("lllllllllllllllllllllll");
   try {
     let day1 = "";

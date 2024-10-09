@@ -8,11 +8,12 @@ const MBR_table = require("../model/model_natMBR");
 
 // master machine
 router.get("/master_MC", async (req, res) => {
+  console.log("master_MC...");
   try {
     let result = await MBR_table.sequelize.query(`
-SELECT distinct [mc_no] as [machine_no]
-  FROM [machine_data].[dbo].[DATA_PRODUCTION_ASSY]
- order by mc_no asc
+    SELECT distinct (upper([mc_no])) as [machine_no]
+    FROM [data_machine_assy].[dbo].[DATA_PRODUCTION_ASSY]
+   order by upper([mc_no]) asc
       `);
 
     res.json({
@@ -33,7 +34,6 @@ router.get("/master_process", async (req, res) => {
       FROM [master_data].[dbo].[master_part_assembly]
       order by process asc
         `);
-    console.log(result);
     res.json({
       result: result[0],
     });
@@ -52,8 +52,8 @@ router.post("/master_size", async (req, res) => {
       FROM [master_data].[dbo].[master_part_assembly]
       where [process] = '${req.body.process}'
         `);
-    console.log("master_size");
-    console.log(result_size);
+    // console.log("master_size");
+    // console.log(result_size);
     res.json({
       result_size: result_size[0],
       api_result: constance.result_ok,
@@ -73,8 +73,8 @@ router.post("/master_type", async (req, res) => {
         WHERE process = '${req.body.process}'
         ORDER BY type desc`
     );
-    console.log("master_type");
-    console.log(result_type);
+    // console.log("master_type");
+    // console.log(result_type);
     res.json({
       result_type: result_type[0],
       api_result: constance.result_ok,
@@ -94,8 +94,8 @@ router.get("/master_year", async (req, res) => {
       FROM [master_data].[dbo].[app_counter_accumoutput_new]
         ORDER BY FORMAT([mfg_date], 'yyyy') asc`
     );
-    console.log("master_year");
-    console.log(result);
+    // console.log("master_year");
+    // console.log(result);
     res.json({
       result: result[0],
       api_result: constance.result_ok,
