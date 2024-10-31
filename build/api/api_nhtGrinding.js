@@ -17,7 +17,7 @@ function getDatesInRange(startDate, endDate) {
   return dates;
 }
 function formatDate(date) {
-  var d = new Date(date), 
+  var d = new Date(date),
     month = "" + (d.getMonth() + 1),
     day = "" + d.getDate(),
     year = d.getFullYear();
@@ -30,7 +30,7 @@ function formatDate(date) {
 /////////////////////// MMS /////////////////////////
 
 router.post("/master_mc_GD", async (req, res) => {
-  console.log("+++");
+  // console.log("+++");
   // router.post("/TB_mms_mc", async (req, res) => {
   try {
     let result = await grinding_table.sequelize.query(
@@ -100,7 +100,7 @@ router.get("/master_mc", async (req, res) => {
   }
 });
 router.post("/master_mc_GD_basic", async (req, res) => {
-  console.log("+++");
+  // console.log("+++");
   // router.post("/TB_mms_mc", async (req, res) => {
   try {
     let result_basic = await grinding_table.sequelize.query(
@@ -187,7 +187,7 @@ router.post("/GD_mms_log", async (req, res) => {
     ,tb2 as (select  mfg_date,[occurred]
     ,lead([occurred]) over(partition by [mc_no] order by [mc_no],[occurred]) AS [NextTimeStamp]
     ,[mc_status]
-    ,[mc_no]
+    ,[mc_no]z
     from tb1
     where [mc_no] = '${req.body.machine}' and  mfg_date = '${req.body.date}' )
     select mfg_date,convert(varchar,[occurred],120) as [occurred]
@@ -813,7 +813,6 @@ router.post("/GetTopic_time", async (req, res) => {
     // }
     // sum_time = hours + ":" + minutes + ":" + seconds;
     // console.log(sum_time);
-    console.log("=========tatal time ========");
     // console.log(result_time_total[0]);
     return res.json({
       result: Result[0],
@@ -917,11 +916,9 @@ router.get("/mms/:start_date/:end_date/:selectMc", async (req, res) => {
   let { start_date } = req.params;
   let { end_date } = req.params;
   let { selectMc } = req.params;
-  console.log(selectMc);
 
   var list_date = [];
   list_date = getDatesInRange(new Date(start_date), new Date(end_date));
-  console.log("list_date", list_date);
   var command_column = "";
   var command_pivot = "";
   for (let i = 0; i < list_date.length; i++) {
@@ -937,7 +934,6 @@ router.get("/mms/:start_date/:end_date/:selectMc", async (req, res) => {
   command_pivot = command_pivot.substring(2);
 
   //console.log('command_column',command_column);
-  console.log("command_pivot", command_pivot);
 
   try {
     let resultMMS = await grinding_table.sequelize.query(
@@ -978,7 +974,7 @@ ORDER BY pvt.[topic]
 
         `
     );
-    console.log(resultMMS);
+    // console.log(resultMMS);
     arrayData_MMS = resultMMS[0];
 
     let resultList_MMS = [];
@@ -990,7 +986,7 @@ ORDER BY pvt.[topic]
       this[a.topic].data.push(a.array);
     }, Object.create(null));
 
-    console.log(resultList_MMS);
+    // console.log(resultList_MMS);
 
     res.json({
       resultMMS: resultList_MMS,
@@ -1011,7 +1007,7 @@ router.get("/mms_machine", async (req, res) => {
     group by [mc_no]
     order by [mc_no]
         `);
-    console.log(resultMachine[0]);
+    // console.log(resultMachine[0]);
     arrayData = resultMachine[0];
 
     res.json({
@@ -1035,7 +1031,7 @@ router.post("/mms_counter_ICB", async (req, res) => {
   WHERE [mc_no] = '${req.body.mc_no}'
   ORDER BY registered_at DESC
         `);
-    console.log(result[0]);
+    // console.log(result[0]);
     res.json({
       result: result[0],
     });
@@ -1142,8 +1138,8 @@ FROM [counter].[dbo].[data_mcstatus]
       );
 
       // console.log(resultdata);
-      console.log(resultdata[0].length);
-      arrayData = resultdata[0];
+      // console.log(resultdata[0].length);
+      // arrayData = resultdata[0];
       let name_series = ["Operating time", "Non - Operating time"];
       let resultMC_Status = [];
       arrayData.forEach(function (a) {
@@ -1159,7 +1155,7 @@ FROM [counter].[dbo].[data_mcstatus]
         );
       }, Object.create(null));
       // set arr all value
-      console.log("resultMC_Status =========", resultMC_Status);
+      // console.log("resultMC_Status =========", resultMC_Status);
       let getarr1 = [];
       let getarr2 = [];
       for (let index = 0; index < resultMC_Status.length; index++) {
@@ -1200,9 +1196,9 @@ FROM [counter].[dbo].[data_mcstatus]
       }
 
       // console.log(BallUsage[0]);
-      console.log("==============");
-      console.log(dataset);
-      console.log(resultDate);
+      // console.log("==============");
+      // console.log(dataset);
+      // console.log(resultDate);
 
       res.json({
         // resultBall: BallUsage[0],
@@ -1301,7 +1297,7 @@ FROM [counter].[dbo].[data_mcstatus]
 `
       );
 
-      console.log(resultdata[0].length);
+      // console.log(resultdata[0].length);
       arrayData = resultdata[0];
       let name_series = [
         "RUN (1)",
@@ -1327,7 +1323,7 @@ FROM [counter].[dbo].[data_mcstatus]
         );
       }, Object.create(null));
       // set arr all value
-      console.log("resultMC_Status ====status=====", resultMC_Status);
+      // console.log("resultMC_Status ====status=====", resultMC_Status);
       let getarr1 = [];
       let getarr2 = [];
       let getarr3 = [];
@@ -1374,9 +1370,9 @@ FROM [counter].[dbo].[data_mcstatus]
       }
 
       // console.log(BallUsage[0]);
-      console.log("======status========");
-      console.log(dataset);
-      console.log(newDate);
+      // console.log("======status========");
+      // console.log(dataset);
+      // console.log(newDate);
 
       res.json({
         resultdata: resultdata,
@@ -1400,11 +1396,11 @@ router.get(
     let { start_date } = req.params;
     let { end_date } = req.params;
     let { selectMc } = req.params;
-    console.log(selectMc);
+    // console.log(selectMc);
 
     var list_date = [];
     list_date = getDatesInRange(new Date(start_date), new Date(end_date));
-    console.log("list_date", list_date);
+    // console.log("list_date", list_date);
     var command_column = "";
     var command_pivot = "";
     for (let i = 0; i < list_date.length; i++) {
@@ -1459,7 +1455,7 @@ router.get(
       );
 
       arrayData_Over = resultMMS[0];
-      console.log(arrayData_Over);
+      // console.log(arrayData_Over);
       //   arrayData_Over.forEach(function (data, index) {
       //     arrayData_Over[index].array = (data.array.split(","))
       // })
@@ -1533,7 +1529,7 @@ router.post(
     let { end_date } = req.params;
     let { selectMc } = req.params;
     let { topic } = req.params;
-    console.log(req.body);
+    // console.log(req.body);
     var list_date = [];
     list_date = getDatesInRange(new Date(start_date), new Date(end_date));
     // console.log("list_date", list_date);
@@ -1619,7 +1615,7 @@ router.get(
 
     var list_date = [];
     list_date = getDatesInRange(new Date(start_date), new Date(end_date));
-    console.log("list_date", list_date);
+    // console.log("list_date", list_date);
     var command_column = "";
     var command_pivot = "";
     for (let i = 0; i < list_date.length; i++) {
@@ -1723,8 +1719,8 @@ router.get(
 // chart status mc(%)
 router.post("/realtime_status_mc/:date", async (req, res) => {
   try {
-    console.log("chart chart chart --->");
-    console.log(req.body);
+    // console.log("chart chart chart --->");
+    // console.log(req.body);
     let { date } = req.params;
     let Result = await grinding_table.sequelize.query(
       `with tb1 as(SELECT 	 
@@ -1816,8 +1812,8 @@ ORDER BY pvt.[mc_no] ASC`
         data: getarr[index],
       });
     }
-    console.log("======== result_Status_Daily ========", name_status);
-    console.log(result_Status_Daily);
+    // console.log("======== result_Status_Daily ========", name_status);
+    // console.log(result_Status_Daily);
 
     let newArr_MC = [];
     for (let index = 0; index < resultMC.length; index++) {
@@ -1917,7 +1913,7 @@ FOR [status] IN ([RUN],[STOP],[AL],[WAIT_PART],[FULL_PART])
 
 // Get data GD -- yield
 router.post("/get_yr_each/:date/:mc", async (req, res) => {
-  console.log(req.body);
+  // console.log(req.body);
   let { date } = req.params;
   let { mc } = req.params;
   try {
@@ -1930,8 +1926,8 @@ router.post("/get_yr_each/:date/:mc", async (req, res) => {
       WHERE [mc_no] = '${mc}' and FORMAT([registered_at], 'yyyy-MM-dd') = '${date}'
       order by registered_at desc`
     );
-    console.log("+++++++++++ get_yr_each +++++++++++");
-    console.log(Result);
+    // console.log("+++++++++++ get_yr_each +++++++++++");
+    // console.log(Result);
     return res.json({
       result: Result[0],
       api_result: constance.result_ok,
@@ -1950,36 +1946,36 @@ router.post("/get_data_mms_mc_all/:date/:mc", async (req, res) => {
   let { date } = req.params;
   let { mc } = req.params;
   try {
-  let Result = await grinding_table.sequelize.query(
-    `SELECT TOP (1) *
+    let Result = await grinding_table.sequelize.query(
+      `SELECT TOP (1) *
     FROM [data_machine_gd].[dbo].[DATA_PRODUCTION_GD]
     WHERE [mc_no] = '${mc}' and FORMAT([registered_at], 'yyyy-MM-dd') = '${date}'
     order by registered_at desc`
-  ); 
-  console.log("+++++++++++ get_data_mms_mc_all +++++++++++");
-  console.log(Result);
-  return res.json({
-    result: Result[0],
-    api_result: constance.result_ok,
-  });
-} catch (error) {
-  // console.log(error);
-  res.json({
-    error,
-    api_result: constance.result_nok,
-  });
-}
+    );
+    // console.log("+++++++++++ get_data_mms_mc_all +++++++++++");
+    // console.log(Result);
+    return res.json({
+      result: Result[0],
+      api_result: constance.result_ok,
+    });
+  } catch (error) {
+    // console.log(error);
+    res.json({
+      error,
+      api_result: constance.result_nok,
+    });
+  }
 });
 
 // chart product / Yield All MD
 router.post("/MMS_prod_IC_GD/:mc_no/:start_date", async (req, res) => {
-try {
-  let { start_date } = req.params;
-  let { mc_no } = req.params;
-  console.log("mc_nomc_nomc_nomc_nomc_nomc_no");
-  // console.log(mc_no);
-  // console.log("click PT", start_date);
-  let resultdata = await grinding_table.sequelize.query(` 
+  try {
+    let { start_date } = req.params;
+    let { mc_no } = req.params;
+    console.log("mc_nomc_nomc_nomc_nomc_nomc_no", mc_no, start_date);
+    // console.log(mc_no);
+    // console.log("click PT", start_date);
+    let resultdata = await grinding_table.sequelize.query(` 
     -- chart PD
     SELECT [registered_at], convert(varchar, [registered_at], 8) as time
     ,format(iif(DATEPART(HOUR, [registered_at]) < 8, dateadd(day, -1, [registered_at]), [registered_at]), 'yyyy-MM-dd') as mfg_date
@@ -2007,83 +2003,85 @@ try {
     WHEN DATEPART(HOUR,registered_at) = '23' THEN 'B'
     WHEN DATEPART(HOUR,registered_at) = '7' THEN 'C'
   ELSE 'other' END 
-  ORDER BY shift;`)
-  // console.log(resultdata[0]);
-  arrayData = resultdata[0];
-  arrayData_yield = resultdata[0];
-  let seriesOutput = [];
-  // let seriesUTL = [];
+  ORDER BY shift;`);
+    // console.log(resultdata[0]);
+    arrayData = resultdata[0];
+    arrayData_yield = resultdata[0];
+    let seriesOutput = [];
+    // let seriesUTL = [];
 
-  const firstData = {
-    registered_at: "2023-06-16T06:00:00.183Z",
-    mfg_date: "2023-06-15",
-    mc_no: "ab",
-    model: "a",
-    prod_total: 0,
-  };
-  const index_data = arrayData[0].prod_total;
-  // console.log("iii",index_data);
-  await seriesOutput.push(index_data);
-  // console.log("arrayData",arrayData.unshift(firstData));
-  for (let i = 0; i < arrayData.length - 1; i++) {
-    // console.log((i+1).toString() + " : " + (arrayData[i+1].dairy_ok - arrayData[i].dairy_ok).toString())
-    await seriesOutput.push(
-      // (arrayData[i+1].dairy_ok - arrayData[i].dairy_ok).toString()
-      (arrayData[i + 1].prod_total - arrayData[i].prod_total).toString() < 0
-        ? 0
-        : (arrayData[i + 1].prod_total - arrayData[i].prod_total).toString()
-    );
-    // await seriesUTL.push((((arrayData[i+1].dairy_ok - arrayData[i].dairy_ok)/arrayData[i].target_utl)*100).toString());
-    // seriesUTL = (
-    //   ((arrayData[i + 1].prod_total - arrayData[i].prod_total) /
-    //     arrayData[i].target_utl) *
-    //   100
-    // ).toString();
+    const firstData = {
+      registered_at: "2023-06-16T06:00:00.183Z",
+      mfg_date: "2023-06-15",
+      mc_no: "ab",
+      model: "a",
+      prod_total: 0,
+    };
+    const index_data = arrayData[0].prod_total;
+    // console.log("iii",index_data);
+    await seriesOutput.push(index_data);
+    // console.log("arrayData",arrayData.unshift(firstData));
+    for (let i = 0; i < arrayData.length - 1; i++) {
+      // console.log((i+1).toString() + " : " + (arrayData[i+1].dairy_ok - arrayData[i].dairy_ok).toString())
+      await seriesOutput.push(
+        // (arrayData[i+1].dairy_ok - arrayData[i].dairy_ok).toString()
+        (arrayData[i + 1].prod_total - arrayData[i].prod_total).toString() < 0
+          ? 0
+          : (arrayData[i + 1].prod_total - arrayData[i].prod_total).toString()
+      );
+      // await seriesUTL.push((((arrayData[i+1].dairy_ok - arrayData[i].dairy_ok)/arrayData[i].target_utl)*100).toString());
+      // seriesUTL = (
+      //   ((arrayData[i + 1].prod_total - arrayData[i].prod_total) /
+      //     arrayData[i].target_utl) *
+      //   100
+      // ).toString();
+    }
+    console.log("seriesOutput", seriesOutput);
+    let seriesTarget = [
+      1440, 1440, 1440, 1440, 1440, 1440, 1440, 1440, 1440, 1440, 1440, 1440,
+      1440, 1440, 1440, 1440, 1440, 1440, 1440, 1440, 1440, 1440, 1440, 1440,
+    ];
+    let seriesYield = [];
+
+    // seriesTarget.shift();
+    let seriesOutput_new = {
+      name: "Production",
+      type: "column",
+      data: seriesOutput,
+    };
+    let seriesTarget_new = {
+      name: "Yield rate",
+      type: "line",
+      data: seriesYield,
+    };
+    let seriesYieldrate_new = {
+      name: "Target",
+      type: "line",
+      data: seriesTarget,
+    };
+
+    let seriesNew = [seriesOutput_new, seriesYieldrate_new];
+    // console.log("=========== resultdata[0] ===========", result_prod_sh[0]);
+    res.json({
+      resultOutput: seriesNew,
+      result_PD: seriesOutput,
+      result: resultdata, // chart PD
+      result_prod_sh: result_prod_sh[0],
+    });
+    // console.log("lllll", resultOutput);
+  } catch (error) {
+    // res.json({
+    //   result: error,
+    //   api_result: constance.result_nok,
+    // });
   }
-  console.log("seriesOutput", seriesOutput);
-  let seriesTarget = [1440,1440,1440,1440,1440,1440,1440,1440,1440,1440,1440,1440,1440,1440,1440,1440,1440,1440,1440,1440,1440,1440,1440,1440];
-  let seriesYield = [];
-  
-  // seriesTarget.shift();
-  let seriesOutput_new = {
-    name: "Production",
-    type: "column",
-    data: seriesOutput,
-  };
-  let seriesTarget_new = {
-    name: "Yield rate",
-    type: "line",
-    data: seriesYield,
-  };
-  let seriesYieldrate_new = {
-    name: "Target",
-    type: "line",
-    data: seriesTarget,
-  };
-
-  let seriesNew = [seriesOutput_new,seriesYieldrate_new];
-  console.log("=========== resultdata[0] ===========",result_prod_sh[0]);
-  res.json({
-    resultOutput: seriesNew,
-    result_PD: seriesOutput,
-    result: resultdata, // chart PD
-    result_prod_sh: result_prod_sh[0],
-    
-  });
-  console.log("lllll", resultOutput);
-} catch (error) {
-  // res.json({
-  //   result: error,
-  //   api_result: constance.result_nok,
-  // });
-}
 });
 
-// chart PIE ==> alarm liat 
+// chart PIE ==> alarm liat
 router.post("/data_pie_Alarmlist_GD", async (req, res) => {
-try {
-  let result = await grinding_table.sequelize.query(
-    ` -- CHART PIE ALARMLIST
+  try {
+    let result = await grinding_table.sequelize.query(
+      ` -- CHART PIE ALARMLIST
     WITH tb1 AS (SELECT
      UPPER([mc_no]) AS [mc_no],[occurred], LEAD([occurred]) OVER (ORDER BY [occurred] ) AS restored
      ,REPLACE([alarm], '_', '') AS [alarm] --[alarm]
@@ -2103,16 +2101,125 @@ try {
   FROM tb1 
   GROUP BY mc_no,alarm
   ORDER BY rnk asc`
-
-  );
-  console.log("JJJJJJJJJJJJJ");
-  console.log(req.body.machine," >> ",result[0]);
-  return res.json({ result: result[0] });
-} catch (error) {
-  res.json({
-    result: error,
-    api_result: constance.result_nok,
-  });
-}
+    );
+    // console.log("JJJJJJJJJJJJJ");
+    // console.log(req.body.machine, " >> ", result[0]);
+    return res.json({ result: result[0] });
+  } catch (error) {
+    res.json({
+      result: error,
+      api_result: constance.result_nok,
+    });
+  }
 });
+
+// table total mornitor mc
+router.post("/gd_mornitoring_all/:start_date", async (req, res) => {
+  try {
+    let { start_date } = req.params;
+    console.log(req.body, start_date, moment().format("yyyy-MM-DD"));
+    const hour = parseInt(moment().format("HH"), 10);
+
+    if (start_date === moment().format("yyyy-MM-DD")) {
+      let mc = ["B", "R", "H"];
+      let results = {};
+      console.log("ok");
+      for (let i = 0; i < mc.length; i++) {
+        let result = await grinding_table.sequelize.query(`
+      -- today === moment
+      WITH result AS (SELECT registered_at,mc_no,
+        MAX(CASE WHEN RN = 1 THEN format(registered_at,'HH:mm:ss') ELSE NULL END) time
+        ,MAX(CASE WHEN RN = 1 THEN eachct ELSE NULL END) ect_B_R
+        ,MAX(CASE WHEN RN = 1 THEN idl ELSE NULL END) idle_time_B_R
+        ,MAX(CASE WHEN RN = 1 THEN avgct ELSE NULL END) avg_ct_B_H
+        ,MAX(CASE WHEN RN = 1 THEN prod_total ELSE NULL END) prod_total_B_R_H
+        ,MAX(CASE WHEN RN = 1 THEN yieldrt ELSE NULL END) yr_B
+        ,MAX(CASE WHEN RN = 1 THEN utilization ELSE NULL END) utl
+        ,MAX(CASE WHEN RN = 1 THEN cth1 ELSE NULL END) ect1_H
+        ,MAX(CASE WHEN RN = 1 THEN cth2 ELSE NULL END) ect2_H
+        ,MAX(CASE WHEN RN = 1 THEN idh1 ELSE NULL END) idle_time1_H
+        ,MAX(CASE WHEN RN = 1 THEN idh2 ELSE NULL END) idle_time2_H
+     FROM (
+     SELECT format(iif(DATEPART(HOUR, [registered_at]) < 8, dateadd(day, -1, [registered_at]), [registered_at]), 'yyyy-MM-dd') as [mfg_date],
+     registered_at,UPPER([mc_no]) AS [mc_no],[process],[d_str1],[d_str2],[rssi],[avgct],[eachct],[yieldrt],[idl],[ng_p],[ng_n],[tng]
+    ,[prod_total],[utilization],[utl_total],[prod_s1],[prod_s2],[prod_s3],[cth1],[cth2],[idh1],[idh2]
+     ,ROW_NUMBER() OVER (PARTITION BY [mc_no] ORDER BY [registered_at] DESC) RN
+   FROM [data_machine_gd].[dbo].[DATA_PRODUCTION_GD]
+   where format(iif(DATEPART(HOUR, [registered_at]) < 8, dateadd(day, -1, [registered_at]), [registered_at]), 'yyyy-MM-dd') = '${start_date}'
+   AND mc_no LIKE '%${mc[i]}'
+   --order by registered_at desc,mc_no asc
+   ) t1
+       GROUP BY registered_at,[mc_no],eachct,idl,avgct,prod_total,yieldrt,utilization,cth1,cth2,idh1,idh2
+       )
+     SELECT registered_at,mc_no,time,ect_B_R,idle_time_B_R,avg_ct_B_H, prod_total_B_R_H,yr_B,utl
+     ,ect1_H,ect2_H,idle_time1_H,idle_time2_H,CONVERT(char(5), time, 108) as at_time, format(registered_at,'yyyy-MM-dd HH:mm') AS now_date
+     FROM result
+       where time IS NOT NULL
+       order by mc_no asc
+ 
+      `);
+        const data1 = result[0];
+        results[mc[i]] = result; // เก็บผลลัพธ์ในแต่ละรอบใน results object
+      }
+
+      res.json({
+        result: results,
+        api_result: constance.result_ok,
+      });
+    } else {
+      console.log("yesterday");
+      let mc = ["B", "R", "H"];
+      let results = {};
+      // console.log("Yesterday");
+      for (let i = 0; i < mc.length; i++) {
+        let result = await grinding_table.sequelize.query(`
+      -- Yesterday
+      WITH result AS (SELECT registered_at,mc_no,
+        MAX(CASE WHEN RN = 1 THEN format(registered_at,'HH:mm:ss') ELSE NULL END) time
+        ,MAX(CASE WHEN RN = 1 THEN eachct ELSE NULL END) ect_B_R
+        ,MAX(CASE WHEN RN = 1 THEN idl ELSE NULL END) idle_time_B_R
+        ,MAX(CASE WHEN RN = 1 THEN avgct ELSE NULL END) avg_ct_B_H
+        ,MAX(CASE WHEN RN = 1 THEN prod_total ELSE NULL END) prod_total_B_R_H
+        ,MAX(CASE WHEN RN = 1 THEN yieldrt ELSE NULL END) yr_B
+        ,MAX(CASE WHEN RN = 1 THEN utilization ELSE NULL END) utl
+        ,MAX(CASE WHEN RN = 1 THEN cth1 ELSE NULL END) ect1_H
+        ,MAX(CASE WHEN RN = 1 THEN cth2 ELSE NULL END) ect2_H
+        ,MAX(CASE WHEN RN = 1 THEN idh1 ELSE NULL END) idle_time1_H
+        ,MAX(CASE WHEN RN = 1 THEN idh2 ELSE NULL END) idle_time2_H
+     FROM (
+     SELECT format(iif(DATEPART(HOUR, [registered_at]) < 8, dateadd(day, -1, [registered_at]), [registered_at]), 'yyyy-MM-dd') as [mfg_date],
+     registered_at,UPPER([mc_no]) AS [mc_no],[process],[d_str1],[d_str2],[rssi],[avgct],[eachct],[yieldrt],[idl],[ng_p],[ng_n],[tng]
+    ,[prod_total],[utilization],[utl_total],[prod_s1],[prod_s2],[prod_s3],[cth1],[cth2],[idh1],[idh2]
+     ,ROW_NUMBER() OVER (PARTITION BY [mc_no] ORDER BY [registered_at] DESC) RN
+   FROM [data_machine_gd].[dbo].[DATA_PRODUCTION_GD]
+   where format(iif(DATEPART(HOUR, [registered_at]) < 8, dateadd(day, -1, [registered_at]), [registered_at]), 'yyyy-MM-dd') = '${start_date}'
+   AND mc_no LIKE '%${mc[i]}' AND DATEPART(HOUR, registered_at) = 7
+   ) t1
+       GROUP BY registered_at,[mc_no],eachct,idl,avgct,prod_total,yieldrt,utilization,cth1,cth2,idh1,idh2
+       )
+     SELECT *,CONVERT(char(5), time, 108) as at_time, format(registered_at,'yyyy-MM-dd HH:mm') AS now_date
+     FROM result
+       where time IS NOT NULL
+       order by mc_no asc
+ 
+      `);
+        // SUM Prod
+        results[mc[i]] = result; // เก็บผลลัพธ์ในแต่ละรอบใน results object
+      // console.log(results[mc[i]]);
+    }
+
+      res.json({
+        result: results,
+        api_result: constance.result_ok,
+      });
+    }
+    // console.log("หยุด");
+  } catch (error) {
+    res.json({
+      result: error,
+      api_result: constance.result_nok,
+    });
+  }
+});
+
 module.exports = router;
