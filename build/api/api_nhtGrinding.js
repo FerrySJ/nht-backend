@@ -2036,7 +2036,7 @@ router.post("/MMS_prod_IC_GD/:mc_no/:start_date", async (req, res) => {
       //   100
       // ).toString();
     }
-    console.log("seriesOutput", seriesOutput);
+    // console.log("seriesOutput", seriesOutput);
     let seriesTarget = [
       1440, 1440, 1440, 1440, 1440, 1440, 1440, 1440, 1440, 1440, 1440, 1440,
       1440, 1440, 1440, 1440, 1440, 1440, 1440, 1440, 1440, 1440, 1440, 1440,
@@ -2117,13 +2117,13 @@ router.post("/data_pie_Alarmlist_GD", async (req, res) => {
 router.post("/gd_mornitoring_all/:start_date", async (req, res) => {
   try {
     let { start_date } = req.params;
-    console.log(req.body, start_date, moment().format("yyyy-MM-DD"));
+    // console.log(req.body, start_date, moment().format("yyyy-MM-DD"));
     const hour = parseInt(moment().format("HH"), 10);
 
     if (start_date === moment().format("yyyy-MM-DD")) {
       let mc = ["B", "R", "H"];
       let results = {};
-      console.log("ok");
+      // console.log("ok");
       for (let i = 0; i < mc.length; i++) {
         let result = await grinding_table.sequelize.query(`
       -- today === moment
@@ -2139,21 +2139,26 @@ router.post("/gd_mornitoring_all/:start_date", async (req, res) => {
         ,MAX(CASE WHEN RN = 1 THEN cth2 ELSE NULL END) ect2_H
         ,MAX(CASE WHEN RN = 1 THEN idh1 ELSE NULL END) idle_time1_H
         ,MAX(CASE WHEN RN = 1 THEN idh2 ELSE NULL END) idle_time2_H
+        ,MAX(CASE WHEN RN = 1 THEN yield_ok ELSE NULL END) yield_ok
+        ,MAX(CASE WHEN RN = 1 THEN yield_ng_pos ELSE NULL END) yield_ng_pos
+        ,MAX(CASE WHEN RN = 1 THEN yield_ng_neg ELSE NULL END) yield_ng_neg
      FROM (
      SELECT format(iif(DATEPART(HOUR, [registered_at]) < 8, dateadd(day, -1, [registered_at]), [registered_at]), 'yyyy-MM-dd') as [mfg_date],
      registered_at,UPPER([mc_no]) AS [mc_no],[process],[d_str1],[d_str2],[rssi],[avgct],[eachct],[yieldrt],[idl],[ng_p],[ng_n],[tng]
     ,[prod_total],[utilization],[utl_total],[prod_s1],[prod_s2],[prod_s3],[cth1],[cth2],[idh1],[idh2]
+    ,[yield_ok],[yield_ng_pos],[yield_ng_neg]
      ,ROW_NUMBER() OVER (PARTITION BY [mc_no] ORDER BY [registered_at] DESC) RN
    FROM [data_machine_gd].[dbo].[DATA_PRODUCTION_GD]
    where format(iif(DATEPART(HOUR, [registered_at]) < 8, dateadd(day, -1, [registered_at]), [registered_at]), 'yyyy-MM-dd') = '${start_date}'
    AND mc_no LIKE '%${mc[i]}'
    --order by registered_at desc,mc_no asc
    ) t1
-       GROUP BY registered_at,[mc_no],eachct,idl,avgct,prod_total,yieldrt,utilization,cth1,cth2,idh1,idh2
+       GROUP BY registered_at,[mc_no],eachct,idl,avgct,prod_total,yieldrt,utilization,cth1,cth2,idh1,idh2,[yield_ok],[yield_ng_pos],[yield_ng_neg]
        )
      SELECT registered_at,mc_no,time,ect_B_R,idle_time_B_R,avg_ct_B_H, prod_total_B_R_H,yr_B,utl
      ,ect1_H,ect2_H,idle_time1_H,idle_time2_H,CONVERT(char(5), time, 108) as at_time, format(registered_at,'yyyy-MM-dd HH:mm') AS now_date
-     FROM result
+    ,[yield_ok],[yield_ng_pos],[yield_ng_neg]
+    FROM result
        where time IS NOT NULL
        order by mc_no asc
  
@@ -2186,12 +2191,16 @@ router.post("/gd_mornitoring_all/:start_date", async (req, res) => {
         ,MAX(CASE WHEN RN = 1 THEN cth2 ELSE NULL END) ect2_H
         ,MAX(CASE WHEN RN = 1 THEN idh1 ELSE NULL END) idle_time1_H
         ,MAX(CASE WHEN RN = 1 THEN idh2 ELSE NULL END) idle_time2_H
+        ,MAX(CASE WHEN RN = 1 THEN yield_ok ELSE NULL END) yield_ok
+        ,MAX(CASE WHEN RN = 1 THEN yield_ng_pos ELSE NULL END) yield_ng_pos
+        ,MAX(CASE WHEN RN = 1 THEN yield_ng_neg ELSE NULL END) yield_ng_neg
      FROM (
      SELECT format(iif(DATEPART(HOUR, [registered_at]) < 8, dateadd(day, -1, [registered_at]), [registered_at]), 'yyyy-MM-dd') as [mfg_date],
      registered_at,UPPER([mc_no]) AS [mc_no],[process],[d_str1],[d_str2],[rssi],[avgct],[eachct],[yieldrt],[idl],[ng_p],[ng_n],[tng]
     ,[prod_total],[utilization],[utl_total],[prod_s1],[prod_s2],[prod_s3],[cth1],[cth2],[idh1],[idh2]
      ,ROW_NUMBER() OVER (PARTITION BY [mc_no] ORDER BY [registered_at] DESC) RN
-   FROM [data_machine_gd].[dbo].[DATA_PRODUCTION_GD]
+    ,[yield_ok],[yield_ng_pos],[yield_ng_neg]
+    FROM [data_machine_gd].[dbo].[DATA_PRODUCTION_GD]
    where format(iif(DATEPART(HOUR, [registered_at]) < 8, dateadd(day, -1, [registered_at]), [registered_at]), 'yyyy-MM-dd') = '${start_date}'
    AND mc_no LIKE '%${mc[i]}' AND DATEPART(HOUR, registered_at) = 7
    ) t1
