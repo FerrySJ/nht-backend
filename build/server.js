@@ -28,6 +28,7 @@ app.use("/api/api_inDataBall", require("./api/api_inDataBall"));
 app.use("/api/api_nhtAN", require("./api/api_nhtAN")); 
 app.use("/api/api_mbr_status", require("./api/api_nhtMBR_Status")); 
 app.use("/api/api_data_sl", require("./api/api_inDataSL")); 
+app.use("/api/backup_data", require("./api/api_bak_data")); // backup GD
 
 //================================================
 app.listen(2005, () => { // run server
