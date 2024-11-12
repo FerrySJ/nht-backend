@@ -212,7 +212,13 @@ router.get("/MBRC_Ball_tb/:yesterday", async (req, res) => {
     let resultdata_Ball = await MBR_table.sequelize.query(
       `SELECT
       datepart(hour,[registered_at]) as newHours
-    ,format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') as [mfg_date]
+          ,format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') as [mfg_date]
+          --,max([c1_ok])*6 as totalSize10
+          --,max([c2_ok])*6 as totalSize20
+          --,max([c3_ok])*6 as totalSize30
+          --,max([c4_ok])*6 as totalSize40
+          --,max([c5_ok])*6 as totalSize50
+    
     ,IIF([model]  like '%830%' or [model]  like '' ,([c1_ok])*6
     ,IIF([model] like '%626%' or [model] like '%608%' or [model] like '%6202%' or [model] like '%840%' or [model] like '%940%' or [model] like '%1340%' or [model] like '%1560%' or [model] like '%627%' or [model] like '%730%', ([c1_ok])*7
     ,IIF( [model] like '%1350%' or [model] like '%1360%' or [model] like '%6001%' or [model] like '%630%', ([c1_ok])*8
@@ -261,7 +267,59 @@ router.get("/MBRC_Ball_tb/:yesterday", async (req, res) => {
         ,[mc_no],[model]
      FROM [data_machine_assy].[dbo].[DATA_PRODUCTION_ASSY]
      where format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') = '${yesterday}'  
-    and datepart(hour,[registered_at]) in ('7' ) `
+    and datepart(hour,[registered_at]) in ('7' ) 
+    order by mc_no asc
+    `
+
+// ` -- by MIC SELECT 
+// model,
+// mc_no,
+// newHours,
+// mfg_date,
+// multiplier,
+// COALESCE(c1_ok * multiplier, 0) AS totalSize10,
+// COALESCE(c2_ok * multiplier, 0) AS totalSize20,
+// COALESCE(c3_ok * multiplier, 0) AS totalSize30,
+// COALESCE(c4_ok * multiplier, 0) AS totalSize40,
+// COALESCE(c5_ok * multiplier, 0) AS totalSize50
+// FROM (
+// SELECT 
+//     model,
+//     c1_ok,
+//     c2_ok,
+//     c3_ok,
+//     c4_ok,
+//     c5_ok,
+//     mc_no,
+//     DATEPART(hour, registered_at) AS newHours,
+//     FORMAT(
+//         CASE 
+//             WHEN DATEPART(hour, registered_at) < 8 
+//             THEN DATEADD(day, -1, registered_at) 
+//             ELSE registered_at 
+//         END, 'yyyy-MM-dd'
+//     ) AS mfg_date,
+//     CASE 
+//         WHEN model LIKE '%830%' OR model = '' THEN 6
+//         WHEN model LIKE '%626%' OR model LIKE '%608%' OR model LIKE '%6202%' 
+//           OR model LIKE '%840%' OR model LIKE '%940%' OR model LIKE '%1340%' 
+//           OR model LIKE '%1560%' OR model LIKE '%627%' OR model LIKE '%730%' THEN 7
+//         WHEN model LIKE '%1350%' OR model LIKE '%1360%' OR model LIKE '%6001%' 
+//           OR model LIKE '%630%' THEN 8
+//         WHEN model LIKE '%1680%' OR model LIKE '%1660%' OR model LIKE '%1060%' 
+//           OR model LIKE '%6002%' THEN 9
+//         WHEN model LIKE '%1889%' OR model LIKE '%1260%' THEN 10
+//         WHEN model LIKE '%740%' THEN 11
+//         WHEN model LIKE '%850%' OR model LIKE '%614%' THEN 13
+//         WHEN model LIKE '%6803%' THEN 15
+//         ELSE NULL
+//     END AS multiplier
+// FROM data_machine_assy.dbo.DATA_PRODUCTION_ASSY
+// WHERE 
+//     DATEPART(hour, registered_at) = 7
+// ) AS subq
+// WHERE mfg_date = '2024-11-03';`
+
   //     `with tb1 as(SELECT
   //       datepart(hour,[registered_at]) as newHours
   //           ,format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') as [mfg_date]
@@ -5254,7 +5312,8 @@ router.get("/MMS_downtime_MBRC_MD/:mc_no/:start_date", async (req, res) => {
 router.post("/MBRC_mornitoring_all/:start_date", async (req, res) => {
   try {
     let { start_date } = req.params;
-    const hour = parseInt(moment().format("HH"), 10);
+  console.log(start_date);
+  const hour = parseInt(moment().format("HH"), 10);
     if (start_date === moment().format("yyyy-MM-DD")) {
       // if (req.body.yesterday != start_date) {
       console.log("ok");
@@ -5327,6 +5386,7 @@ const sumProduction = data1.reduce((acc, curr) => {
         api_result: constance.result_ok,
       });
     } else {
+      console.log("ygguguguu");
       let result = await MBR_table.sequelize.query(
         `with tb1 as(
           select [mc_no],model
@@ -5367,17 +5427,27 @@ as production_total,DT,wait_time,yield,UTL,ct
             order by mc_no asc
             `
       );
-      console.log("======= NOK Table Mornitoring =======");
+      // console.log(result[0])
+      console.log("======= NOK Table Mornitoring =======", start_date);
       // SUM Prod
       const data1 = result[0];
-
       const sumProductionTotalsByModel = (data) => {
         return data.reduce((acc, item) => {
-          // แยกตัวอักษรและตัวเลขใน mc_no
-          const model = item.mc_no.match(/^[A-Z]+/)[0];
-          const productionTotal =
-            item.production_total !== null ? item.production_total : 0;
-
+          // ตรวจสอบว่า mc_no มีค่าและสามารถ match ได้
+          const mc_no = item.mc_no;
+      console.log(item.mc_no)
+      let model = '';
+      
+          if (mc_no && /^[A-Z]+/.test(mc_no)) {
+            model = mc_no.match(/^[A-Z]+/)[0];
+          } else {
+            // กำหนดค่าหาก mc_no ไม่มีหรือไม่ตรง pattern
+            model = item.mc_no;
+            // model = 'UNKNOWN';
+          }
+      
+          const productionTotal = item.production_total !== null ? item.production_total : 0;
+      
           if (!acc[model]) {
             acc[model] = 0;
           }
@@ -5385,12 +5455,31 @@ as production_total,DT,wait_time,yield,UTL,ct
           return acc;
         }, {});
       };
-
+      
       const result_prod_total = sumProductionTotalsByModel(data1);
+      
+      // const sumProductionTotalsByModel = (data) => {
+      //   return data.reduce((acc, item) => {
+      //     // แยกตัวอักษรและตัวเลขใน mc_no
+      //     const model = item.mc_no.match(/^[A-Z]+/)[0];
+      //     console.log(item.mc_no.match(/^[A-Z]+/)[0]);
+      //     const productionTotal =
+      //       item.production_total !== null ? item.production_total : 0;
+
+      //     if (!acc[model]) {
+      //       acc[model] = 0;
+      //     }
+      //     acc[model] += productionTotal;
+      //     return acc;
+      //   }, {});
+      // };
+      // const result_prod_total = sumProductionTotalsByModel(data1);
       const totalSum = Object.values(result_prod_total).reduce(
         (acc, curr) => acc + curr,
         0
       );
+      
+      console.log("totalSum",totalSum);
       res.json({
         result: result,
         result_prod_total: result_prod_total,
@@ -5400,6 +5489,7 @@ as production_total,DT,wait_time,yield,UTL,ct
     }
     console.log("หยุด");
   } catch (error) {
+    console.log(error);
     res.json({
       result: error,
       api_result: constance.result_nok,
