@@ -5312,7 +5312,7 @@ router.get("/MMS_downtime_MBRC_MD/:mc_no/:start_date", async (req, res) => {
 router.post("/MBRC_mornitoring_all/:start_date", async (req, res) => {
   try {
     let { start_date } = req.params;
-  console.log(start_date);
+  // console.log(start_date);
   const hour = parseInt(moment().format("HH"), 10);
     if (start_date === moment().format("yyyy-MM-DD")) {
       // if (req.body.yesterday != start_date) {
@@ -5435,7 +5435,7 @@ as production_total,DT,wait_time,yield,UTL,ct
         return data.reduce((acc, item) => {
           // ตรวจสอบว่า mc_no มีค่าและสามารถ match ได้
           const mc_no = item.mc_no;
-      console.log(item.mc_no)
+      // console.log(item.mc_no)
       let model = '';
       
           if (mc_no && /^[A-Z]+/.test(mc_no)) {
@@ -5479,7 +5479,7 @@ as production_total,DT,wait_time,yield,UTL,ct
         0
       );
       
-      console.log("totalSum",totalSum);
+      // console.log("totalSum",totalSum);
       res.json({
         result: result,
         result_prod_total: result_prod_total,
@@ -7400,4 +7400,42 @@ router.post("/MBRC_Ball_Size_MD_7Day_Ago/:start_date", async (req, res) => {
   }
 });
 
+router.post("/mms_prod_qc", async (req, res) => {
+  try {
+    let result = await MBR_table.sequelize.query(` 
+    WITH rows AS (
+      SELECT convert(varchar, registered_at, 120) AS at_date
+      ,UPPER(b.[mc_no]) AS mcno, [a_meas] AS a_gauge, [b_meas] AS b_gauge, match, [daily_ok], [daily_ng], [daily_tt]
+      ,[a_ng_p] AS or_ng_p, [a_ng_n] AS or_ng_n, [b_ng_p] AS ir_ng_p, [b_ng_n] AS ir_ng_n, [a_unm] AS or_unm, [b_unm] AS ir_unm
+      ,b.[error_t],b.[alarm_t],b.[run_t],b.[w_or_t],b.[w_ir_t],b.[w_ball_t]
+      ,b.[w_rtnr_t],b.[full_p_t],b.[adjust_t],b.[set_up_t],b.[plan_s_t],b.[cycle_t],b.[target_u],b.[stop_t]
+      ,ROW_NUMBER() OVER (PARTITION BY b.mc_no ORDER BY f.registered DESC) AS RowNum
+      ,Case when [daily_tt]=0 then 0
+      Else cast(([daily_ok]/[daily_tt])*100  as decimal(20,2)) 
+      End as yield
+  FROM [data_machine_assy].[dbo].[DATA_PRODUCTION_ASSY] b
+  RIGHT JOIN  [data_machine_assyf].[dbo].[DATA_PRODUCTION_ASSYF] f
+  ON b.mc_no = f.mc_no COLLATE SQL_Latin1_General_CP1_CI_AS 
+  AND FORMAT(b.registered_at,'yyyy-MM-dd HH') = FORMAT(registered,'yyyy-MM-dd HH')
+  WHERE format(iif(DATEPART(HOUR, [registered_at]) < 8, dateadd(day, -1, [registered_at]), [registered_at]), 'yyyy-MM-dd') = '${req.body.date}' 
+ )
+ SELECT * 
+ FROM rows
+ WHERE RowNum = 1
+ ORDER BY mcno ASC
+    `);
+    // console.log(result[0]);
+    res.json({
+      result: result[0],
+      api_result: constance.result_ok,
+    });
+    // console.log("lllll", resultOutput);
+  } catch (error) {
+    console.log("qc error", error);
+    res.json({
+      result: error,
+      api_result: constance.result_nok,
+    });
+  }
+});
 module.exports = router;
