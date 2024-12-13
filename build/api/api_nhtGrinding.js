@@ -2117,13 +2117,13 @@ router.post("/data_pie_Alarmlist_GD", async (req, res) => {
 router.post("/gd_mornitoring_all/:start_date", async (req, res) => {
   try {
     let { start_date } = req.params;
-    // console.log(req.body, start_date, moment().format("yyyy-MM-DD"));
+    console.log(req.body, start_date, moment().format("yyyy-MM-DD"));
     const hour = parseInt(moment().format("HH"), 10);
 
     if (start_date === moment().format("yyyy-MM-DD")) {
       let mc = ["B", "R", "H"];
       let results = {};
-      // console.log("ok");
+      console.log("ok");
       for (let i = 0; i < mc.length; i++) {
         let result = await grinding_table.sequelize.query(`
       -- today === moment
@@ -2135,6 +2135,7 @@ router.post("/gd_mornitoring_all/:start_date", async (req, res) => {
         ,MAX(CASE WHEN RN = 1 THEN prod_total ELSE NULL END) prod_total_B_R_H
         ,MAX(CASE WHEN RN = 1 THEN yieldrt ELSE NULL END) yr_B
         ,MAX(CASE WHEN RN = 1 THEN utilization ELSE NULL END) utl
+        ,MAX(CASE WHEN RN = 1 THEN [utl_total] ELSE NULL END) utlH
         ,MAX(CASE WHEN RN = 1 THEN cth1 ELSE NULL END) ect1_H
         ,MAX(CASE WHEN RN = 1 THEN cth2 ELSE NULL END) ect2_H
         ,MAX(CASE WHEN RN = 1 THEN idh1 ELSE NULL END) idle_time1_H
@@ -2153,9 +2154,9 @@ router.post("/gd_mornitoring_all/:start_date", async (req, res) => {
    AND mc_no LIKE '%${mc[i]}'
    --order by registered_at desc,mc_no asc
    ) t1
-       GROUP BY registered_at,[mc_no],eachct,idl,avgct,prod_total,yieldrt,utilization,cth1,cth2,idh1,idh2,[yield_ok],[yield_ng_pos],[yield_ng_neg]
+       GROUP BY registered_at,[mc_no],eachct,idl,avgct,prod_total,yieldrt,utilization,cth1,cth2,idh1,idh2,[yield_ok],[yield_ng_pos],[yield_ng_neg],[utl_total]
        )
-     SELECT registered_at,mc_no,time,ect_B_R,idle_time_B_R,avg_ct_B_H, prod_total_B_R_H,yr_B,utl
+     SELECT registered_at,mc_no,time,ect_B_R,idle_time_B_R,avg_ct_B_H, prod_total_B_R_H,yr_B,utl,utlH
      ,ect1_H,ect2_H,idle_time1_H,idle_time2_H,CONVERT(char(5), time, 108) as at_time, format(registered_at,'yyyy-MM-dd HH:mm') AS now_date
     ,[yield_ok],[yield_ng_pos],[yield_ng_neg]
     FROM result
@@ -2210,6 +2211,157 @@ router.post("/gd_mornitoring_all/:start_date", async (req, res) => {
      FROM result
        where time IS NOT NULL
        order by mc_no asc
+ 
+      `);
+        // SUM Prod
+        results[mc[i]] = result; // เก็บผลลัพธ์ในแต่ละรอบใน results object
+      // console.log(results[mc[i]]);
+    }
+
+      res.json({
+        result: results,
+        api_result: constance.result_ok,
+      });
+    }
+    // console.log("หยุด");
+  } catch (error) {
+    res.json({
+      result: error,
+      api_result: constance.result_nok,
+    });
+  }
+});
+
+// new database ::: table total mornitor mc
+router.post("/gd_mornitoring_all_new/:start_date", async (req, res) => {
+  try {
+    let { start_date } = req.params;
+    console.log(req.body, start_date, moment().format("yyyy-MM-DD"));
+    const hour = parseInt(moment().format("HH"), 10);
+
+    if (start_date === moment().format("yyyy-MM-DD")) {
+      let mc = ["B", "R", "H"];
+      let results = {};
+      console.log("ok");
+      for (let i = 0; i < mc.length; i++) {
+        let result = await grinding_table.sequelize.query(`
+        -- today === moment
+        WITH result AS (SELECT [registered],mc_no,
+          MAX(CASE WHEN RN = 1 THEN format([registered],'HH:mm:ss') ELSE NULL END) time
+          ,MAX(CASE WHEN RN = 1 THEN eachct ELSE NULL END) ect_B_R
+          ,MAX(CASE WHEN RN = 1 THEN idl ELSE NULL END) idle_time_B_R
+          ,MAX(CASE WHEN RN = 1 THEN avgct ELSE NULL END) avg_ct_B_H
+          ,MAX(CASE WHEN RN = 1 THEN prod_total ELSE NULL END) prod_total_B_R_H
+          ,MAX(CASE WHEN RN = 1 THEN yieldrt ELSE NULL END) yr_B
+          ,MAX(CASE WHEN RN = 1 THEN utilization ELSE NULL END) utl
+          ,MAX(CASE WHEN RN = 1 THEN [utl_total] ELSE NULL END) utlH
+          ,MAX(CASE WHEN RN = 1 THEN cth1 ELSE NULL END) ect1_H
+          ,MAX(CASE WHEN RN = 1 THEN cth2 ELSE NULL END) ect2_H
+          ,MAX(CASE WHEN RN = 1 THEN idh1 ELSE NULL END) idle_time1_H
+          ,MAX(CASE WHEN RN = 1 THEN idh2 ELSE NULL END) idle_time2_H
+          ,MAX(CASE WHEN RN = 1 THEN yield_ok ELSE NULL END) yield_ok
+          ,MAX(CASE WHEN RN = 1 THEN yield_ng_pos ELSE NULL END) yield_ng_pos
+          ,MAX(CASE WHEN RN = 1 THEN yield_ng_neg ELSE NULL END) yield_ng_neg
+          ,MAX(CASE WHEN RN = 1 THEN [time_full] ELSE NULL END) [time_full]
+          ,MAX(CASE WHEN RN = 1 THEN [time_full1] ELSE NULL END) [time_full1]
+          ,MAX(CASE WHEN RN = 1 THEN [time_wait] ELSE NULL END) [time_wait]
+          ,MAX(CASE WHEN RN = 1 THEN [time_wait1] ELSE NULL END) [time_wait1]
+          ,MAX(CASE WHEN RN = 1 THEN [time_alarm] ELSE NULL END) [time_alarm]
+          ,MAX(CASE WHEN RN = 1 THEN [time_alarm1] ELSE NULL END) [time_alarm1]
+          ,MAX(CASE WHEN RN = 1 THEN [time_worn] ELSE NULL END) [time_worn]
+          ,MAX(CASE WHEN RN = 1 THEN [time_worn1] ELSE NULL END) [time_worn1]
+          ,MAX(CASE WHEN RN = 1 THEN [time_warm] ELSE NULL END) [time_warm]
+          ,MAX(CASE WHEN RN = 1 THEN [time_warm1] ELSE NULL END) [time_warm1]
+          ,MAX(CASE WHEN RN = 1 THEN [time_dress] ELSE NULL END) [time_dress]
+          ,MAX(CASE WHEN RN = 1 THEN [time_dress1] ELSE NULL END) [time_dress1]
+          ,MAX(CASE WHEN RN = 1 THEN [time_other] ELSE NULL END) [time_other]
+          ,MAX(CASE WHEN RN = 1 THEN [time_other1] ELSE NULL END) [time_other1]
+          ,MAX(CASE WHEN RN = 1 THEN [time_run1] ELSE NULL END) [time_run1]
+          ,MAX(CASE WHEN RN = 1 THEN [time_run] ELSE NULL END) [time_run]
+       FROM (
+       SELECT format(iif(DATEPART(HOUR, [registered]) < 8, dateadd(day, -1, [registered]), [registered]), 'yyyy-MM-dd') as [mfg_date],
+       [registered],UPPER([mc_no]) AS [mc_no],[process],[rssi],[avgct],[eachct],[yieldrt],[idl],[ng_p],[ng_n],[tng]
+      ,[prod_total],[utilization],[utl_total],[prod_s1],[prod_s2],[prod_s3],[cth1],[cth2],[idh1],[idh2]
+      ,[yield_ok],[yield_ng_pos],[yield_ng_neg],[time_run1],[time_run],[time_full],[time_full1],[time_wait],[time_wait1],[time_alarm],[time_alarm1],[time_worn],[time_worn1],[time_warm],[time_warm1],[time_dress],[time_dress1],[time_other],[time_other1]
+       ,ROW_NUMBER() OVER (PARTITION BY [mc_no] ORDER BY [registered] DESC) RN
+     FROM [data_machine_gd2].[dbo].[DATA_PRODUCTION_GD]
+     where format(iif(DATEPART(HOUR, [registered]) < 8, dateadd(day, -1, [registered]), [registered]), 'yyyy-MM-dd') = '${start_date}'
+     AND mc_no LIKE '%${mc[i]}'
+     --order by registered_at desc,mc_no asc
+     ) t1
+         GROUP BY [registered],[mc_no],eachct,idl,avgct,prod_total,yieldrt,utilization,cth1,cth2,idh1,idh2,[yield_ok],[yield_ng_pos],[yield_ng_neg],[utl_total]
+        ,[time_run1],[time_run],[time_full],[time_full1],[time_wait],[time_wait1],[time_alarm],[time_alarm1],[time_worn],[time_worn1],[time_warm],[time_warm1],[time_dress],[time_dress1],[time_other],[time_other1]
+         )
+       SELECT [registered],mc_no,time,ect_B_R,idle_time_B_R,avg_ct_B_H, prod_total_B_R_H,yr_B,utl,utlH
+       ,ect1_H,ect2_H,idle_time1_H,idle_time2_H,CONVERT(char(5), time, 108) as at_time, format([registered],'yyyy-MM-dd HH:mm') AS now_date
+      ,[yield_ok],[yield_ng_pos],[yield_ng_neg],[time_run1],[time_run],[time_full],[time_full1],[time_wait],[time_wait1],[time_alarm],[time_alarm1],[time_worn],[time_worn1],[time_warm],[time_warm1],[time_dress],[time_dress1],[time_other],[time_other1]
+      FROM result
+         where time IS NOT NULL
+         order by mc_no asc
+ 
+      `);
+        const data1 = result[0];
+        results[mc[i]] = result; // เก็บผลลัพธ์ในแต่ละรอบใน results object
+      }
+
+      res.json({
+        result: results,
+        api_result: constance.result_ok,
+      });
+    } else {
+      console.log("yesterday");
+      let mc = ["B", "R", "H"];
+      let results = {};
+      // console.log("Yesterday");
+      for (let i = 0; i < mc.length; i++) {
+        let result = await grinding_table.sequelize.query(` -- Yesterday
+        WITH result AS (SELECT [registered],mc_no,
+          MAX(CASE WHEN RN = 1 THEN format([registered],'HH:mm:ss') ELSE NULL END) time
+          ,MAX(CASE WHEN RN = 1 THEN eachct ELSE NULL END) ect_B_R
+          ,MAX(CASE WHEN RN = 1 THEN idl ELSE NULL END) idle_time_B_R
+          ,MAX(CASE WHEN RN = 1 THEN avgct ELSE NULL END) avg_ct_B_H
+          ,MAX(CASE WHEN RN = 1 THEN prod_total ELSE NULL END) prod_total_B_R_H
+          ,MAX(CASE WHEN RN = 1 THEN yieldrt ELSE NULL END) yr_B
+          ,MAX(CASE WHEN RN = 1 THEN utilization ELSE NULL END) utl
+          ,MAX(CASE WHEN RN = 1 THEN cth1 ELSE NULL END) ect1_H
+          ,MAX(CASE WHEN RN = 1 THEN cth2 ELSE NULL END) ect2_H
+          ,MAX(CASE WHEN RN = 1 THEN idh1 ELSE NULL END) idle_time1_H
+          ,MAX(CASE WHEN RN = 1 THEN idh2 ELSE NULL END) idle_time2_H
+          ,MAX(CASE WHEN RN = 1 THEN yield_ok ELSE NULL END) yield_ok
+          ,MAX(CASE WHEN RN = 1 THEN yield_ng_pos ELSE NULL END) yield_ng_pos
+          ,MAX(CASE WHEN RN = 1 THEN yield_ng_neg ELSE NULL END) yield_ng_neg
+          ,MAX(CASE WHEN RN = 1 THEN [time_full] ELSE NULL END) [time_full]
+          ,MAX(CASE WHEN RN = 1 THEN [time_full1] ELSE NULL END) [time_full1]
+          ,MAX(CASE WHEN RN = 1 THEN [time_wait] ELSE NULL END) [time_wait]
+          ,MAX(CASE WHEN RN = 1 THEN [time_wait1] ELSE NULL END) [time_wait1]
+          ,MAX(CASE WHEN RN = 1 THEN [time_alarm] ELSE NULL END) [time_alarm]
+          ,MAX(CASE WHEN RN = 1 THEN [time_alarm1] ELSE NULL END) [time_alarm1]
+          ,MAX(CASE WHEN RN = 1 THEN [time_worn] ELSE NULL END) [time_worn]
+          ,MAX(CASE WHEN RN = 1 THEN [time_worn1] ELSE NULL END) [time_worn1]
+          ,MAX(CASE WHEN RN = 1 THEN [time_warm] ELSE NULL END) [time_warm]
+          ,MAX(CASE WHEN RN = 1 THEN [time_warm1] ELSE NULL END) [time_warm1]
+          ,MAX(CASE WHEN RN = 1 THEN [time_dress] ELSE NULL END) [time_dress]
+          ,MAX(CASE WHEN RN = 1 THEN [time_dress1] ELSE NULL END) [time_dress1]
+          ,MAX(CASE WHEN RN = 1 THEN [time_other] ELSE NULL END) [time_other]
+          ,MAX(CASE WHEN RN = 1 THEN [time_other1] ELSE NULL END) [time_other1]
+          ,MAX(CASE WHEN RN = 1 THEN [time_run1] ELSE NULL END) [time_run1]
+          ,MAX(CASE WHEN RN = 1 THEN [time_run] ELSE NULL END) [time_run]
+       FROM (
+       SELECT format(iif(DATEPART(HOUR, [registered]) < 8, dateadd(day, -1, [registered]), [registered]), 'yyyy-MM-dd') as [mfg_date],
+       [registered],UPPER([mc_no]) AS [mc_no],[process],[rssi],[avgct],[eachct],[yieldrt],[idl],[ng_p],[ng_n],[tng]
+      ,[prod_total],[utilization],[utl_total],[prod_s1],[prod_s2],[prod_s3],[cth1],[cth2],[idh1],[idh2]
+       ,ROW_NUMBER() OVER (PARTITION BY [mc_no] ORDER BY [registered] DESC) RN
+      ,[yield_ok],[yield_ng_pos],[yield_ng_neg],[time_run],[time_run1],[time_full],[time_full1],[time_wait],[time_wait1],[time_alarm],[time_alarm1],[time_worn],[time_worn1],[time_warm],[time_warm1],[time_dress],[time_dress1],[time_other],[time_other1]
+      FROM [data_machine_gd2].[dbo].[DATA_PRODUCTION_GD]
+     where format(iif(DATEPART(HOUR, [registered]) < 8, dateadd(day, -1, [registered]), [registered]), 'yyyy-MM-dd') = '${start_date}'
+     AND mc_no LIKE '%${mc[i]}' AND DATEPART(HOUR, [registered]) = 7
+     ) t1
+         GROUP BY [registered],[mc_no],eachct,idl,avgct,prod_total,yieldrt,utilization,cth1,cth2,idh1,idh2,[time_run],[time_run1],[time_full],[time_full1],[time_wait],[time_wait1],[time_alarm],[time_alarm1],[time_worn],[time_worn1],[time_warm],[time_warm1],[time_dress],[time_dress1],[time_other],[time_other1]
+         )
+       SELECT *,CONVERT(char(5), time, 108) as at_time, format([registered],'yyyy-MM-dd HH:mm') AS now_date
+       FROM result
+         where time IS NOT NULL
+         order by mc_no asc
  
       `);
         // SUM Prod

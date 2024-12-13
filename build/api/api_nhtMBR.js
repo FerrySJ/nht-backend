@@ -271,180 +271,180 @@ router.get("/MBRC_Ball_tb/:yesterday", async (req, res) => {
     order by mc_no asc
     `
 
-// ` -- by MIC SELECT 
-// model,
-// mc_no,
-// newHours,
-// mfg_date,
-// multiplier,
-// COALESCE(c1_ok * multiplier, 0) AS totalSize10,
-// COALESCE(c2_ok * multiplier, 0) AS totalSize20,
-// COALESCE(c3_ok * multiplier, 0) AS totalSize30,
-// COALESCE(c4_ok * multiplier, 0) AS totalSize40,
-// COALESCE(c5_ok * multiplier, 0) AS totalSize50
-// FROM (
-// SELECT 
-//     model,
-//     c1_ok,
-//     c2_ok,
-//     c3_ok,
-//     c4_ok,
-//     c5_ok,
-//     mc_no,
-//     DATEPART(hour, registered_at) AS newHours,
-//     FORMAT(
-//         CASE 
-//             WHEN DATEPART(hour, registered_at) < 8 
-//             THEN DATEADD(day, -1, registered_at) 
-//             ELSE registered_at 
-//         END, 'yyyy-MM-dd'
-//     ) AS mfg_date,
-//     CASE 
-//         WHEN model LIKE '%830%' OR model = '' THEN 6
-//         WHEN model LIKE '%626%' OR model LIKE '%608%' OR model LIKE '%6202%' 
-//           OR model LIKE '%840%' OR model LIKE '%940%' OR model LIKE '%1340%' 
-//           OR model LIKE '%1560%' OR model LIKE '%627%' OR model LIKE '%730%' THEN 7
-//         WHEN model LIKE '%1350%' OR model LIKE '%1360%' OR model LIKE '%6001%' 
-//           OR model LIKE '%630%' THEN 8
-//         WHEN model LIKE '%1680%' OR model LIKE '%1660%' OR model LIKE '%1060%' 
-//           OR model LIKE '%6002%' THEN 9
-//         WHEN model LIKE '%1889%' OR model LIKE '%1260%' THEN 10
-//         WHEN model LIKE '%740%' THEN 11
-//         WHEN model LIKE '%850%' OR model LIKE '%614%' THEN 13
-//         WHEN model LIKE '%6803%' THEN 15
-//         ELSE NULL
-//     END AS multiplier
-// FROM data_machine_assy.dbo.DATA_PRODUCTION_ASSY
-// WHERE 
-//     DATEPART(hour, registered_at) = 7
-// ) AS subq
-// WHERE mfg_date = '2024-11-03';`
+      // ` -- by MIC SELECT
+      // model,
+      // mc_no,
+      // newHours,
+      // mfg_date,
+      // multiplier,
+      // COALESCE(c1_ok * multiplier, 0) AS totalSize10,
+      // COALESCE(c2_ok * multiplier, 0) AS totalSize20,
+      // COALESCE(c3_ok * multiplier, 0) AS totalSize30,
+      // COALESCE(c4_ok * multiplier, 0) AS totalSize40,
+      // COALESCE(c5_ok * multiplier, 0) AS totalSize50
+      // FROM (
+      // SELECT
+      //     model,
+      //     c1_ok,
+      //     c2_ok,
+      //     c3_ok,
+      //     c4_ok,
+      //     c5_ok,
+      //     mc_no,
+      //     DATEPART(hour, registered_at) AS newHours,
+      //     FORMAT(
+      //         CASE
+      //             WHEN DATEPART(hour, registered_at) < 8
+      //             THEN DATEADD(day, -1, registered_at)
+      //             ELSE registered_at
+      //         END, 'yyyy-MM-dd'
+      //     ) AS mfg_date,
+      //     CASE
+      //         WHEN model LIKE '%830%' OR model = '' THEN 6
+      //         WHEN model LIKE '%626%' OR model LIKE '%608%' OR model LIKE '%6202%'
+      //           OR model LIKE '%840%' OR model LIKE '%940%' OR model LIKE '%1340%'
+      //           OR model LIKE '%1560%' OR model LIKE '%627%' OR model LIKE '%730%' THEN 7
+      //         WHEN model LIKE '%1350%' OR model LIKE '%1360%' OR model LIKE '%6001%'
+      //           OR model LIKE '%630%' THEN 8
+      //         WHEN model LIKE '%1680%' OR model LIKE '%1660%' OR model LIKE '%1060%'
+      //           OR model LIKE '%6002%' THEN 9
+      //         WHEN model LIKE '%1889%' OR model LIKE '%1260%' THEN 10
+      //         WHEN model LIKE '%740%' THEN 11
+      //         WHEN model LIKE '%850%' OR model LIKE '%614%' THEN 13
+      //         WHEN model LIKE '%6803%' THEN 15
+      //         ELSE NULL
+      //     END AS multiplier
+      // FROM data_machine_assy.dbo.DATA_PRODUCTION_ASSY
+      // WHERE
+      //     DATEPART(hour, registered_at) = 7
+      // ) AS subq
+      // WHERE mfg_date = '2024-11-03';`
 
-  //     `with tb1 as(SELECT
-  //       datepart(hour,[registered_at]) as newHours
-  //           ,format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') as [mfg_date]
-  //           ,max([c1_ok])*6 as totalSize10
-  //           ,max([c2_ok])*6 as totalSize20
-  //           ,max([c3_ok])*6 as totalSize30
-  //           ,max([c4_ok])*6 as totalSize40
-  //           ,max([c5_ok])*6 as totalSize50
-  //         ,[mc_no],[model]
-  //      FROM [data_machine_assy].[dbo].[DATA_PRODUCTION_ASSY]
-  //      where format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') = '${yesterday}'  and ([model]  like '%830%' or [model]  like '' )  
-	//    and datepart(hour,[registered_at]) in ('7' )  -- or model like '')
-  //      group by [registered_at],[c1_ok],[c2_ok],[c3_ok],[c4_ok],[c5_ok],[mc_no],[model],
-  //     datepart(hour,[registered_at])
-  //  UNION ALL 
-  //     SELECT
-  //       datepart(hour,[registered_at]) as newHours
-  //         ,format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') as [mfg_date]
-  //         ,max([c1_ok])*7 as totalSize7_MC10
-  //         ,max([c2_ok])*7 as totalSize7_MC20
-  //         ,max([c3_ok])*7 as totalSize7_MC30
-  //         ,max([c4_ok])*7 as totalSize7_MC40
-  //         ,max([c5_ok])*7 as totalSize7_MC50
-  //       ,[mc_no],[model]
-  //      FROM [data_machine_assy].[dbo].[DATA_PRODUCTION_ASSY]
-  //       where format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') = '${yesterday}'  and ( [model] like '%626%' or [model] like '%608%' 
-	// 	or [model] like '%6202%' or [model] like '%840%' or [model] like '%940%' or [model] like '%1340%' or [model] like '%1560%' or [model] like '%627%' or [model] like '%730%') and datepart(hour,[registered_at]) in ('7' ) 
-  //       group by registered_at,[c1_ok],[c2_ok],[c3_ok],[c4_ok],[c5_ok],[mc_no],[model],
-  //     datepart(hour,[registered_at])
-  //     UNION ALL 
-  //     SELECT
-  //       datepart(hour,[registered_at]) as newHours
-  //         ,format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') as [mfg_date]
-  //         ,max([c1_ok])*8 as totalSize8_MC10
-  //         ,max([c2_ok])*8 as totalSize8_MC20
-  //         ,max([c3_ok])*8 as totalSize8_MC30
-  //         ,max([c4_ok])*8 as totalSize8_MC40
-  //         ,max([c5_ok])*8 as totalSize8_MC50
-  //       ,[mc_no],[model]
-  //      FROM [data_machine_assy].[dbo].[DATA_PRODUCTION_ASSY]
-  //       where format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') = '${yesterday}'  and ( [model] like '%1350%' or 
-	// 	[model] like '%1360%' or [model] like '%6001%' or [model] like '%630%'  ) and datepart(hour,[registered_at]) in ('7' ) 
-  //       group by registered_at,[c1_ok],[c2_ok],[c3_ok],[c4_ok],[c5_ok],[mc_no],[model],
-  //     datepart(hour,[registered_at])
-  //     UNION ALL 
-  //     SELECT
-  //       datepart(hour,[registered_at]) as newHours
-  //         ,format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') as [mfg_date]
-  //         ,max([c1_ok])*9 as totalSize9_MC10
-  //         ,max([c2_ok])*9 as totalSize9_MC20
-  //         ,max([c3_ok])*9 as totalSize9_MC30
-  //         ,max([c4_ok])*9 as totalSize9_MC40
-  //         ,max([c5_ok])*9 as totalSize9_MC50
-  //       ,[mc_no],[model]
-  //      FROM [data_machine_assy].[dbo].[DATA_PRODUCTION_ASSY]
-  //       where format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') = '${yesterday}'  and ( [model] like '%1680%' 
-	// 	or [model] like '%1660%' or [model] like '%1060%' or [model] like '%6002%' ) and datepart(hour,[registered_at]) in ('7' ) 
-  //       group by registered_at,[c1_ok],[c2_ok],[c3_ok],[c4_ok],[c5_ok],[mc_no],[model],
-  //     datepart(hour,[registered_at])
-  //     UNION ALL 
-  //     SELECT
-  //       datepart(hour,[registered_at]) as newHours
-  //         ,format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') as [mfg_date]
-  //         ,max([c1_ok])*10 as totalSize10_MC10
-  //         ,max([c2_ok])*10 as totalSize10_MC20
-  //         ,max([c3_ok])*10 as totalSize10_MC30
-  //         ,max([c4_ok])*10 as totalSize10_MC40
-  //         ,max([c5_ok])*10 as totalSize10_MC50
-  //       ,[mc_no],[model]
-  //      FROM [data_machine_assy].[dbo].[DATA_PRODUCTION_ASSY]
-  //       where format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') = '${yesterday}'  and ( [model] like '%1889%' 
-	// 	or [model] like '%1260%') and datepart(hour,[registered_at]) in ('7' ) 
-  //       group by registered_at,[c1_ok],[c2_ok],[c3_ok],[c4_ok],[c5_ok],[mc_no],[model],
-  //     datepart(hour,[registered_at])
-  //     UNION ALL 
-  //     SELECT
-  //       datepart(hour,[registered_at]) as newHours
-  //         ,format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') as [mfg_date]
-  //         ,max([c1_ok])*11 as totalSize11_MC10
-  //         ,max([c2_ok])*11 as totalSize11_MC20
-  //         ,max([c3_ok])*11 as totalSize11_MC30
-  //         ,max([c4_ok])*11 as totalSize11_MC40
-  //         ,max([c5_ok])*11 as totalSize11_MC50
-  //       ,[mc_no],[model]
-  //      FROM [data_machine_assy].[dbo].[DATA_PRODUCTION_ASSY]
-  //       where format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') = '${yesterday}'  and ( [model] like '%740%') and datepart(hour,[registered_at]) in ('7' ) 
-  //       group by registered_at,[c1_ok],[c2_ok],[c3_ok],[c4_ok],[c5_ok],[mc_no],[model],
-  //     datepart(hour,[registered_at])
-  //    UNION ALL 
-  //     SELECT
-  //       datepart(hour,[registered_at]) as newHours
-  //         ,format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') as [mfg_date]
-  //         ,max([c1_ok])*13 as totalSize13_MC10
-  //         ,max([c2_ok])*13 as totalSize13_MC20
-  //         ,max([c3_ok])*13 as totalSize13_MC30
-  //         ,max([c4_ok])*13 as totalSize13_MC40
-  //         ,max([c5_ok])*13 as totalSize13_MC50
-  //       ,[mc_no],[model]
-  //      FROM [data_machine_assy].[dbo].[DATA_PRODUCTION_ASSY]
-  //       where format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') = '${yesterday}'  and ( [model] like '%850%'
-	// 	or [model] like '%614%') and datepart(hour,[registered_at]) in ('7' ) 
-  //       group by registered_at,[c1_ok],[c2_ok],[c3_ok],[c4_ok],[c5_ok],[mc_no],[model],
-  //     datepart(hour,[registered_at])
-  //      UNION ALL 
-  //     SELECT
-  //       datepart(hour,[registered_at]) as newHours
-  //         ,format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') as [mfg_date]
-  //         ,max([c1_ok])*15 as totalSize15_MC10
-  //         ,max([c2_ok])*15 as totalSize15_MC20
-  //         ,max([c3_ok])*15 as totalSize15_MC30
-  //         ,max([c4_ok])*15 as totalSize15_MC40
-  //         ,max([c5_ok])*15 as totalSize15_MC50
-  //       ,[mc_no],[model]
-  //      FROM [data_machine_assy].[dbo].[DATA_PRODUCTION_ASSY]
-  //       where format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') = '${yesterday}'  and ( [model] like '%6803%') and datepart(hour,[registered_at]) in ('7' ) 
-  //       group by registered_at,[c1_ok],[c2_ok],[c3_ok],[c4_ok],[c5_ok],[mc_no],[model],
-  //     datepart(hour,[registered_at])
-  // )
-  //       SELECT
-  //         sum(totalSize10) as totalSize10,sum(totalSize20) as totalSize20
-  //         ,sum(totalSize30) as totalSize30,sum(totalSize40) as totalSize40
-  //         ,sum(totalSize50) as totalSize50,[mc_no],model,[mfg_date]
-  //       FROM tb1
-  //         group by [mc_no],model,[mfg_date]
-  //   order by mc_no asc`
+      //     `with tb1 as(SELECT
+      //       datepart(hour,[registered_at]) as newHours
+      //           ,format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') as [mfg_date]
+      //           ,max([c1_ok])*6 as totalSize10
+      //           ,max([c2_ok])*6 as totalSize20
+      //           ,max([c3_ok])*6 as totalSize30
+      //           ,max([c4_ok])*6 as totalSize40
+      //           ,max([c5_ok])*6 as totalSize50
+      //         ,[mc_no],[model]
+      //      FROM [data_machine_assy].[dbo].[DATA_PRODUCTION_ASSY]
+      //      where format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') = '${yesterday}'  and ([model]  like '%830%' or [model]  like '' )
+      //    and datepart(hour,[registered_at]) in ('7' )  -- or model like '')
+      //      group by [registered_at],[c1_ok],[c2_ok],[c3_ok],[c4_ok],[c5_ok],[mc_no],[model],
+      //     datepart(hour,[registered_at])
+      //  UNION ALL
+      //     SELECT
+      //       datepart(hour,[registered_at]) as newHours
+      //         ,format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') as [mfg_date]
+      //         ,max([c1_ok])*7 as totalSize7_MC10
+      //         ,max([c2_ok])*7 as totalSize7_MC20
+      //         ,max([c3_ok])*7 as totalSize7_MC30
+      //         ,max([c4_ok])*7 as totalSize7_MC40
+      //         ,max([c5_ok])*7 as totalSize7_MC50
+      //       ,[mc_no],[model]
+      //      FROM [data_machine_assy].[dbo].[DATA_PRODUCTION_ASSY]
+      //       where format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') = '${yesterday}'  and ( [model] like '%626%' or [model] like '%608%'
+      // 	or [model] like '%6202%' or [model] like '%840%' or [model] like '%940%' or [model] like '%1340%' or [model] like '%1560%' or [model] like '%627%' or [model] like '%730%') and datepart(hour,[registered_at]) in ('7' )
+      //       group by registered_at,[c1_ok],[c2_ok],[c3_ok],[c4_ok],[c5_ok],[mc_no],[model],
+      //     datepart(hour,[registered_at])
+      //     UNION ALL
+      //     SELECT
+      //       datepart(hour,[registered_at]) as newHours
+      //         ,format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') as [mfg_date]
+      //         ,max([c1_ok])*8 as totalSize8_MC10
+      //         ,max([c2_ok])*8 as totalSize8_MC20
+      //         ,max([c3_ok])*8 as totalSize8_MC30
+      //         ,max([c4_ok])*8 as totalSize8_MC40
+      //         ,max([c5_ok])*8 as totalSize8_MC50
+      //       ,[mc_no],[model]
+      //      FROM [data_machine_assy].[dbo].[DATA_PRODUCTION_ASSY]
+      //       where format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') = '${yesterday}'  and ( [model] like '%1350%' or
+      // 	[model] like '%1360%' or [model] like '%6001%' or [model] like '%630%'  ) and datepart(hour,[registered_at]) in ('7' )
+      //       group by registered_at,[c1_ok],[c2_ok],[c3_ok],[c4_ok],[c5_ok],[mc_no],[model],
+      //     datepart(hour,[registered_at])
+      //     UNION ALL
+      //     SELECT
+      //       datepart(hour,[registered_at]) as newHours
+      //         ,format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') as [mfg_date]
+      //         ,max([c1_ok])*9 as totalSize9_MC10
+      //         ,max([c2_ok])*9 as totalSize9_MC20
+      //         ,max([c3_ok])*9 as totalSize9_MC30
+      //         ,max([c4_ok])*9 as totalSize9_MC40
+      //         ,max([c5_ok])*9 as totalSize9_MC50
+      //       ,[mc_no],[model]
+      //      FROM [data_machine_assy].[dbo].[DATA_PRODUCTION_ASSY]
+      //       where format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') = '${yesterday}'  and ( [model] like '%1680%'
+      // 	or [model] like '%1660%' or [model] like '%1060%' or [model] like '%6002%' ) and datepart(hour,[registered_at]) in ('7' )
+      //       group by registered_at,[c1_ok],[c2_ok],[c3_ok],[c4_ok],[c5_ok],[mc_no],[model],
+      //     datepart(hour,[registered_at])
+      //     UNION ALL
+      //     SELECT
+      //       datepart(hour,[registered_at]) as newHours
+      //         ,format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') as [mfg_date]
+      //         ,max([c1_ok])*10 as totalSize10_MC10
+      //         ,max([c2_ok])*10 as totalSize10_MC20
+      //         ,max([c3_ok])*10 as totalSize10_MC30
+      //         ,max([c4_ok])*10 as totalSize10_MC40
+      //         ,max([c5_ok])*10 as totalSize10_MC50
+      //       ,[mc_no],[model]
+      //      FROM [data_machine_assy].[dbo].[DATA_PRODUCTION_ASSY]
+      //       where format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') = '${yesterday}'  and ( [model] like '%1889%'
+      // 	or [model] like '%1260%') and datepart(hour,[registered_at]) in ('7' )
+      //       group by registered_at,[c1_ok],[c2_ok],[c3_ok],[c4_ok],[c5_ok],[mc_no],[model],
+      //     datepart(hour,[registered_at])
+      //     UNION ALL
+      //     SELECT
+      //       datepart(hour,[registered_at]) as newHours
+      //         ,format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') as [mfg_date]
+      //         ,max([c1_ok])*11 as totalSize11_MC10
+      //         ,max([c2_ok])*11 as totalSize11_MC20
+      //         ,max([c3_ok])*11 as totalSize11_MC30
+      //         ,max([c4_ok])*11 as totalSize11_MC40
+      //         ,max([c5_ok])*11 as totalSize11_MC50
+      //       ,[mc_no],[model]
+      //      FROM [data_machine_assy].[dbo].[DATA_PRODUCTION_ASSY]
+      //       where format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') = '${yesterday}'  and ( [model] like '%740%') and datepart(hour,[registered_at]) in ('7' )
+      //       group by registered_at,[c1_ok],[c2_ok],[c3_ok],[c4_ok],[c5_ok],[mc_no],[model],
+      //     datepart(hour,[registered_at])
+      //    UNION ALL
+      //     SELECT
+      //       datepart(hour,[registered_at]) as newHours
+      //         ,format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') as [mfg_date]
+      //         ,max([c1_ok])*13 as totalSize13_MC10
+      //         ,max([c2_ok])*13 as totalSize13_MC20
+      //         ,max([c3_ok])*13 as totalSize13_MC30
+      //         ,max([c4_ok])*13 as totalSize13_MC40
+      //         ,max([c5_ok])*13 as totalSize13_MC50
+      //       ,[mc_no],[model]
+      //      FROM [data_machine_assy].[dbo].[DATA_PRODUCTION_ASSY]
+      //       where format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') = '${yesterday}'  and ( [model] like '%850%'
+      // 	or [model] like '%614%') and datepart(hour,[registered_at]) in ('7' )
+      //       group by registered_at,[c1_ok],[c2_ok],[c3_ok],[c4_ok],[c5_ok],[mc_no],[model],
+      //     datepart(hour,[registered_at])
+      //      UNION ALL
+      //     SELECT
+      //       datepart(hour,[registered_at]) as newHours
+      //         ,format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') as [mfg_date]
+      //         ,max([c1_ok])*15 as totalSize15_MC10
+      //         ,max([c2_ok])*15 as totalSize15_MC20
+      //         ,max([c3_ok])*15 as totalSize15_MC30
+      //         ,max([c4_ok])*15 as totalSize15_MC40
+      //         ,max([c5_ok])*15 as totalSize15_MC50
+      //       ,[mc_no],[model]
+      //      FROM [data_machine_assy].[dbo].[DATA_PRODUCTION_ASSY]
+      //       where format (iif(DATEPART(HOUR, [registered_at])<8,dateadd(day,-1,[registered_at]),[registered_at]),'yyyy-MM-dd') = '${yesterday}'  and ( [model] like '%6803%') and datepart(hour,[registered_at]) in ('7' )
+      //       group by registered_at,[c1_ok],[c2_ok],[c3_ok],[c4_ok],[c5_ok],[mc_no],[model],
+      //     datepart(hour,[registered_at])
+      // )
+      //       SELECT
+      //         sum(totalSize10) as totalSize10,sum(totalSize20) as totalSize20
+      //         ,sum(totalSize30) as totalSize30,sum(totalSize40) as totalSize40
+      //         ,sum(totalSize50) as totalSize50,[mc_no],model,[mfg_date]
+      //       FROM tb1
+      //         group by [mc_no],model,[mfg_date]
+      //   order by mc_no asc`
     );
 
     // console.log(resultdata_Ball);
@@ -556,7 +556,6 @@ router.get("/MBRC_Ball_tb/:yesterday", async (req, res) => {
     });
   }
 });
-
 
 // chart total :Ball usage (%) by Machine -- Process MA
 router.post("/MBRC_Ball_Size_MA/:start_date/:end_date", async (req, res) => {
@@ -2104,8 +2103,6 @@ SELECT
   }
 });
 
-
-
 // MA By Size / Part DAILY
 router.post(
   "/MBRC_Ball_Size_MA_Daily/:start_date/:end_date",
@@ -2202,7 +2199,6 @@ router.post(
               data: getarr[index],
             });
           }
-
 
           let newDate_Ball = [];
           for (let index = 0; index < resultDate_Ball.length; index++) {
@@ -4180,7 +4176,7 @@ router.post(
           const newDate_Ball = [
             ...new Set(arrayData_Ball_onHand.map((item) => item.lastestDate)),
           ];
-          
+
           let resultStock_Ball_onHand = [];
           arrayData_Ball_onHand.forEach(function (a) {
             if (!this[a.dec]) {
@@ -5079,7 +5075,6 @@ router.get(
   }
 );
 
-
 // chart product / Yield All MD
 router.post("/MMS_prod_yield_MBRC_MD/:mc_no/:start_date", async (req, res) => {
   try {
@@ -5312,8 +5307,8 @@ router.get("/MMS_downtime_MBRC_MD/:mc_no/:start_date", async (req, res) => {
 router.post("/MBRC_mornitoring_all/:start_date", async (req, res) => {
   try {
     let { start_date } = req.params;
-  // console.log(start_date);
-  const hour = parseInt(moment().format("HH"), 10);
+    console.log(start_date);
+    const hour = parseInt(moment().format("HH"), 10);
     if (start_date === moment().format("yyyy-MM-DD")) {
       // if (req.body.yesterday != start_date) {
       console.log("ok");
@@ -5356,28 +5351,31 @@ router.post("/MBRC_mornitoring_all/:start_date", async (req, res) => {
       console.log("======= DATA TODAY Table Mornitoring =======");
       // SUM Prod
       const data1 = result[0];
-      
-// สร้างวัตถุสำหรับเก็บผลรวม production_total ทั้งหมดและแยกตามประเภท mc_no
-const sumProduction = data1.reduce((acc, curr) => {
-  // แยกประเภท mc_no โดยเอาตัวอักษรออกมา (เช่น 'mca' หรือ 'mcb')
-  const mcType = curr.mc_no.match(/[a-zA-Z]+/)[0];
 
-  // ถ้าประเภท mcType ยังไม่เคยมีใน acc.mc_types ให้เริ่มที่ 0
-  if (!acc.mc_types[mcType]) {
-    acc.mc_types[mcType] = 0;
-  }
+      // สร้างวัตถุสำหรับเก็บผลรวม production_total ทั้งหมดและแยกตามประเภท mc_no
+      const sumProduction = data1.reduce(
+        (acc, curr) => {
+          // แยกประเภท mc_no โดยเอาตัวอักษรออกมา (เช่น 'mca' หรือ 'mcb')
+          const mcType = curr.mc_no.match(/[a-zA-Z]+/)[0];
 
-  // เพิ่ม production_total เข้าไปในประเภทที่ตรงกับ mcType
-  acc.mc_types[mcType] += curr.production_total;
+          // ถ้าประเภท mcType ยังไม่เคยมีใน acc.mc_types ให้เริ่มที่ 0
+          if (!acc.mc_types[mcType]) {
+            acc.mc_types[mcType] = 0;
+          }
 
-  // เพิ่ม production_total เข้าไปใน total ที่เก็บค่ารวมทั้งหมด
-  acc.total += curr.production_total;
+          // เพิ่ม production_total เข้าไปในประเภทที่ตรงกับ mcType
+          acc.mc_types[mcType] += curr.production_total;
 
-  return acc;
-}, { total: 0, mc_types: {} });
+          // เพิ่ม production_total เข้าไปใน total ที่เก็บค่ารวมทั้งหมด
+          acc.total += curr.production_total;
 
-// แสดงผลลัพธ์
-// console.log(sumProduction);
+          return acc;
+        },
+        { total: 0, mc_types: {} }
+      );
+
+      // แสดงผลลัพธ์
+      // console.log(sumProduction);
 
       res.json({
         result: result,
@@ -5435,9 +5433,9 @@ as production_total,DT,wait_time,yield,UTL,ct
         return data.reduce((acc, item) => {
           // ตรวจสอบว่า mc_no มีค่าและสามารถ match ได้
           const mc_no = item.mc_no;
-      // console.log(item.mc_no)
-      let model = '';
-      
+          console.log(item.mc_no);
+          let model = "";
+
           if (mc_no && /^[A-Z]+/.test(mc_no)) {
             model = mc_no.match(/^[A-Z]+/)[0];
           } else {
@@ -5445,9 +5443,10 @@ as production_total,DT,wait_time,yield,UTL,ct
             model = item.mc_no;
             // model = 'UNKNOWN';
           }
-      
-          const productionTotal = item.production_total !== null ? item.production_total : 0;
-      
+
+          const productionTotal =
+            item.production_total !== null ? item.production_total : 0;
+
           if (!acc[model]) {
             acc[model] = 0;
           }
@@ -5455,9 +5454,9 @@ as production_total,DT,wait_time,yield,UTL,ct
           return acc;
         }, {});
       };
-      
+
       const result_prod_total = sumProductionTotalsByModel(data1);
-      
+
       // const sumProductionTotalsByModel = (data) => {
       //   return data.reduce((acc, item) => {
       //     // แยกตัวอักษรและตัวเลขใน mc_no
@@ -5478,8 +5477,8 @@ as production_total,DT,wait_time,yield,UTL,ct
         (acc, curr) => acc + curr,
         0
       );
-      
-      // console.log("totalSum",totalSum);
+
+      console.log("totalSum", totalSum);
       res.json({
         result: result,
         result_prod_total: result_prod_total,
@@ -6212,7 +6211,6 @@ router.post("/MBRC_Ball_Size_MA_7Day_Ago/:start_date", async (req, res) => {
           await newDate_Ball.push(item.name);
         }
 
-
         res.json({
           resultBall: result_Ball_7Day,
           result: resultdata_Ball, //for table
@@ -6361,7 +6359,6 @@ router.post("/MBRC_Ball_Size_MA_7Day_Ago/:start_date", async (req, res) => {
           });
         }
 
-
         let newDate_Ball = [];
         for (let index = 0; index < resultDate_Ball.length; index++) {
           const item = resultDate_Ball[index];
@@ -6496,7 +6493,6 @@ router.post("/MBRC_Ball_Size_MA_7Day_Ago/:start_date", async (req, res) => {
             data: getarr[index],
           });
         }
-
 
         let newDate_Ball = [];
         for (let index = 0; index < resultDate_Ball.length; index++) {
@@ -7424,7 +7420,7 @@ router.post("/mms_prod_qc", async (req, res) => {
  WHERE RowNum = 1
  ORDER BY mcno ASC
     `);
-    // console.log(result[0]);
+    console.log(result[0]);
     res.json({
       result: result[0],
       api_result: constance.result_ok,
@@ -7438,4 +7434,5 @@ router.post("/mms_prod_qc", async (req, res) => {
     });
   }
 });
+
 module.exports = router;
