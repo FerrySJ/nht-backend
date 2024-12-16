@@ -7400,27 +7400,27 @@ router.post("/mms_prod_qc", async (req, res) => {
   try {
     let result = await MBR_table.sequelize.query(` 
     WITH rows AS (
-      SELECT convert(varchar, registered_at, 120) AS at_date
+      SELECT convert(varchar, b.[registered], 120) AS at_date
       ,UPPER(b.[mc_no]) AS mcno, [a_meas] AS a_gauge, [b_meas] AS b_gauge, match, [daily_ok], [daily_ng], [daily_tt]
       ,[a_ng_p] AS or_ng_p, [a_ng_n] AS or_ng_n, [b_ng_p] AS ir_ng_p, [b_ng_n] AS ir_ng_n, [a_unm] AS or_unm, [b_unm] AS ir_unm
-      ,b.[error_t],b.[alarm_t],b.[run_t],b.[w_or_t],b.[w_ir_t],b.[w_ball_t]
-      ,b.[w_rtnr_t],b.[full_p_t],b.[adjust_t],b.[set_up_t],b.[plan_s_t],b.[cycle_t],b.[target_u],b.[stop_t]
+      ,[ball_q],[ball_ang],[sep_ng_1],[sep_ng_2],[mn_ng],[d1_ng],[d2_ng],[pre_p_ng],[nail_ng],b.[cycle_t],b.[target_u],b.[error_t]
+      ,b.[alarm_t],b.[run_t],b.[stop_t],b.[w_ball_t],b.[w_ir_t],b.[w_or_t],b.[w_rtnr_t],b.[full_p_t],b.[adjust_t],b.[set_up_t],b.[plan_s_t],b.[m_p_ng]
       ,ROW_NUMBER() OVER (PARTITION BY b.mc_no ORDER BY f.registered DESC) AS RowNum
       ,Case when [daily_tt]=0 then 0
       Else cast(([daily_ok]/[daily_tt])*100  as decimal(20,2)) 
       End as yield
-  FROM [data_machine_assy].[dbo].[DATA_PRODUCTION_ASSY] b
+  FROM [data_machine_assy1].[dbo].[DATA_PRODUCTION_ASSY1] b
   RIGHT JOIN  [data_machine_assyf].[dbo].[DATA_PRODUCTION_ASSYF] f
   ON b.mc_no = f.mc_no COLLATE SQL_Latin1_General_CP1_CI_AS 
-  AND FORMAT(b.registered_at,'yyyy-MM-dd HH') = FORMAT(registered,'yyyy-MM-dd HH')
-  WHERE format(iif(DATEPART(HOUR, [registered_at]) < 8, dateadd(day, -1, [registered_at]), [registered_at]), 'yyyy-MM-dd') = '${req.body.date}' 
+  AND FORMAT(b.[registered],'yyyy-MM-dd HH') = FORMAT(f.[registered],'yyyy-MM-dd HH')
+  WHERE format(iif(DATEPART(HOUR, b.[registered]) < 8, dateadd(day, -1, b.[registered]), b.[registered]), 'yyyy-MM-dd') = '${req.body.date}' 
  )
  SELECT * 
  FROM rows
  WHERE RowNum = 1
  ORDER BY mcno ASC
     `);
-    console.log(result[0]);
+    // console.log(result[0]);
     res.json({
       result: result[0],
       api_result: constance.result_ok,
