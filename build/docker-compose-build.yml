@@ -1,7 +1,7 @@
 version: '3.3'
 services:
   app:
-    image: "nhtminebea/nht-dx-backend:manual22"
+    image: "nhtminebea/nht-dx-backend:manual23"
     build:
       context: .
       dockerfile: Dockerfile-nodejs
